@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Collections;
+using System.Data;
 using System.Data.OleDb;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
 //using System.Runtime.InteropServices；
 
@@ -22,6 +27,7 @@ namespace 恋选PSP文本处理器
         {
             StartLogo startlogo = new StartLogo();
             startlogo.Show();
+            panel_Waiting.Size = this.Size;
 
             //读取码表
             if (!ori_CodeTable.loadCodeTable()) MessageBox.Show("初始化码表错误");
@@ -37,13 +43,33 @@ namespace 恋选PSP文本处理器
                 }
                 text.writeToXML("Text.xml");
             }
-            Reload_List_Text();
+            reload_dataGridView();
             startlogo.Close();
         }
 
-        private void Reload_List_Text()
+        private void reload_dataGridView()
         {
-
+            panel_Waiting.Visible = true;
+            panel_Waiting.Refresh();
+            dataGridView.Rows.Clear();
+            foreach (Text.oneLineText thisLine in text.getAll_NOTNULL())
+            {
+                if (隐藏已翻译文本ToolStripMenuItem.Checked && thisLine.Status == 0) continue;
+                DataGridViewRow thisRow = new DataGridViewRow();
+                thisRow.CreateCells(dataGridView, thisLine.LineNum, thisLine.OriName, thisLine.ChsName, thisLine.OriText, thisLine.ChsText);
+                if (状态着色ToolStripMenuItem.Checked)
+                {
+                    switch (thisLine.Status)
+                    {
+                        case 0: thisRow.DefaultCellStyle.BackColor = Color.LightGreen; break;
+                        case 1: thisRow.DefaultCellStyle.BackColor = Color.Yellow; break;
+                        //case 2: thisRow.DefaultCellStyle.BackColor = Color.White; break;
+                        //default: thisRow.DefaultCellStyle.BackColor = Color.Black; break;
+                    }
+                }
+                dataGridView.Rows.Add(thisRow);
+            }
+            panel_Waiting.Visible = false;
         }
 
         private void 查看码表ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -61,7 +87,7 @@ namespace 恋选PSP文本处理器
                 Application.Exit();
             }
             text.writeToXML("Text.xml");
-            Reload_List_Text();
+            reload_dataGridView();
         }
         
         private void 退出ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -75,9 +101,11 @@ namespace 恋选PSP文本处理器
             thisFile.Filter = "文本文件|*.txt";
             if (thisFile.ShowDialog() == DialogResult.OK)
             {
-                L1_ToolStripStatusLabel.Text = "正在导入，请稍候……";
-                MessageBox.Show(null, "成功导入了 " + text.readFromTXT(thisFile.FileName) + " 行文本", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                L1_ToolStripStatusLabel.Text = "导入完成";
+                mainToolStripStatusLabel.Text = "正在导入，请稍候……";
+                Int32 lineCount = text.readFromTXT(thisFile.FileName);
+                reload_dataGridView();
+                MessageBox.Show(null, "成功导入了 " + lineCount + " 行文本", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                mainToolStripStatusLabel.Text = "导入完成";
             }
         }
 
@@ -87,16 +115,16 @@ namespace 恋选PSP文本处理器
             thisFile.Filter = "文本文件|*.txt";
             if (thisFile.ShowDialog() == DialogResult.OK)
             {
-                L1_ToolStripStatusLabel.Text = "正在导出";
+                mainToolStripStatusLabel.Text = "正在导出";
                 if (!text.writeToTXT(thisFile.FileName))
                 {
                     MessageBox.Show(null, "未知原因导致的导出失败", "失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    L1_ToolStripStatusLabel.Text = "导出失败";
+                    mainToolStripStatusLabel.Text = "导出失败";
                 }
                 else
                 {
                     MessageBox.Show(null, "成功导出文本", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    L1_ToolStripStatusLabel.Text = "导出完成";
+                    mainToolStripStatusLabel.Text = "导出完成";
                 }
             }
         }
@@ -104,12 +132,7 @@ namespace 恋选PSP文本处理器
         private void 保存ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             text.writeToXML("Text.xml");
-            L1_ToolStripStatusLabel.Text = "已保存";
-        }
-
-        private void About_ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            new AboutBox().Show();
+            mainToolStripStatusLabel.Text = "已保存";
         }
 
         private void lOSStudioToolStripMenuItem_Click(object sender, EventArgs e)
@@ -134,56 +157,50 @@ namespace 恋选PSP文本处理器
             if (隐藏已翻译文本ToolStripMenuItem.Checked == false)
             {
                 隐藏已翻译文本ToolStripMenuItem.Checked = true;
-                Reload_List_Text();
+                reload_dataGridView();
             }
             else
             {
                 隐藏已翻译文本ToolStripMenuItem.Checked = false;
-                Reload_List_Text();
+                reload_dataGridView();
             }
         }
 
         private void 刷新ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Reload_List_Text();
+            reload_dataGridView();
         }
 
         private void 生成Scbin与相应码表ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            /*
-            L1_ToolStripStatusLabel.Text = "正在生成码表";
-            ArrayList used_words = new ArrayList();
+            panel_Waiting.Visible = true;
+            panel_Waiting.Refresh();
+            ArrayList usedWords = new ArrayList();
 
-            foreach (Text.oneLineText l in text.getAll_0P())
+            foreach (Text.oneLineText thisLine in text.getAll_NOTNULL())
             {
-                foreach (Char c in l.ChsName + l.ChsText)
+                foreach (Char thisWord_in_thisLine in thisLine.ChsName + thisLine.ChsText)
                 {
-                    Boolean flag = true;
-                    foreach (Char u in used_words)
+                    Boolean unUsed = true;
+                    foreach (Char thisWord_in_usedWords in usedWords)
                     {
-                        if (c == u)
+                        if (thisWord_in_thisLine == thisWord_in_usedWords)
                         {
-                            flag = false;
+                            unUsed = false;
                             break;
                         }
                     }
-                    if (flag) used_words.Add(c);
+                    if (unUsed) usedWords.Add(thisWord_in_thisLine);
                 }
             }
-            L1_ToolStripStatusLabel.Text = "正在建立码表";
-            used_words.Sort();
+            usedWords.Sort();
+            
+            CodeTable chs_CodeTable = new CodeTable();
 
-            CodeTable chs_code_word_list = new CodeTable();
-
-            //添加原码表中各种字符
-            for (Int32 i = 0; i <= 0x01EA; i++)
+            chs_CodeTable.addWord(ori_CodeTable.getWord(0));    //0000
+            foreach (Char thisWord in usedWords)
             {
-                chs_code_word_list.addWord(ori_CodeTable.getWord(i));
-            }
-
-            foreach (Char c in used_words)
-            {
-                chs_code_word_list.addWord(c);
+                chs_CodeTable.addWord(thisWord);
             }
 
             SaveFileDialog TheCodeWordFile = new SaveFileDialog();
@@ -193,7 +210,7 @@ namespace 恋选PSP文本处理器
                 StreamWriter output_TheCodeWordFile = new StreamWriter(new FileStream(TheCodeWordFile.FileName, FileMode.Create, FileAccess.Write),UnicodeEncoding.Unicode);
                 for (Int32 i = 0; i < 0xffff; i++)
                 {
-                    Char c = chs_code_word_list.getWord(i);
+                    Char c = chs_CodeTable.getWord(i);
                     if (c == '\0') break;
                     else output_TheCodeWordFile.WriteLine((i % 0x100).ToString("X2") + (i / 0x100).ToString("X2") + "=" + c);
                 }
@@ -214,7 +231,7 @@ namespace 恋选PSP文本处理器
             {
                 FileStream output_file = new FileStream(TheFile.FileName, FileMode.Create, FileAccess.ReadWrite);
                 Assembly.GetExecutingAssembly().GetManifestResourceStream("恋选PSP文本处理器.Files.sc.bin").CopyTo(output_file);
-                
+
                 sc_file_for_point.Seek(0x90, SeekOrigin.Begin);         //跳至文本指针表
                 while (true)
                 {
@@ -255,9 +272,9 @@ namespace 恋选PSP文本处理器
 
                                 output_file.Seek(sc_file_for_text.Position - 2, SeekOrigin.Begin);      //输出文件文本指针同步
                                 if (Name_Length_Count < now_line_chs_name.Length)
-                                    output_file.Write(chs_code_word_list.getCode(now_line_chs_name[Name_Length_Count++]),0,2);    //输出文本
+                                    output_file.Write(chs_CodeTable.getCode(now_line_chs_name[Name_Length_Count++]), 0, 2);    //输出文本
                                 else
-                                    output_file.Write(new Byte[]{0,0}, 0, 2);    //输出空白
+                                    output_file.Write(new Byte[] { 0, 0 }, 0, 2);    //输出空白
                             }
                             continue;
                         }
@@ -267,13 +284,41 @@ namespace 恋选PSP文本处理器
                         output_file.Seek(sc_file_for_text.Position - 2, SeekOrigin.Begin);      //输出文件文本指针同步
 
                         if (Text_Length_Count < now_line_chs_text.Length)
-                            output_file.Write(chs_code_word_list.getCode(now_line_chs_text[Text_Length_Count++]), 0, 2);    //输出文本
+                            output_file.Write(chs_CodeTable.getCode(now_line_chs_text[Text_Length_Count++]), 0, 2);    //输出文本
                         else
                             output_file.Write(new Byte[] { 0, 0 }, 0, 2);    //输出空白
                     }
                 }
                 sc_file_for_text.Close();
                 sc_file_for_point.Close();
+
+                //更新校验码
+                {
+
+                    Int32[] count = new Int32[16] { 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11 };
+                    Byte[] thisLineByte = new Byte[16];
+                    output_file.Seek(0,SeekOrigin.Begin);
+
+                    while (true)
+                    {
+                        if (output_file.Position >= output_file.Length - 0x10) break;
+                        output_file.Read(thisLineByte, 0, 16);
+                        for (Int32 i = 0; i <= 15; i++)
+                        {
+                            count[i] += thisLineByte[i];
+                            if (count[i] >= 0x100)
+                            {
+                                count[i] %= 0x100;
+                                if (!(i == 7 || i == 15)) count[i + 1]++;
+                            }
+                        }
+                    }
+                    for (Int32 i = 0; i <= 15; i++)
+                    {
+                        thisLineByte[i] = (Byte)count[i];
+                    }
+                    output_file.Write(thisLineByte, 0, 16);
+                }
                 output_file.Close();
             }
             else
@@ -281,13 +326,58 @@ namespace 恋选PSP文本处理器
                 MessageBox.Show("操作已取消");
                 return;
             }
-            L1_ToolStripStatusLabel.Text = "成功生成sc.bin与相应码表";
-             */
+            MessageBox.Show("成功生成sc.bin与相应码表");
+            mainToolStripStatusLabel.Text = "成功生成sc.bin与相应码表";
+            panel_Waiting.Visible = false;
         }
 
         private void 说明ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show(null, "状态着色：" + Environment.NewLine + "绿色：已翻译文本" + Environment.NewLine + "黄色：已翻译，但长度越界文本" + Environment.NewLine + "白色：未翻译文本", "说明");
+        }
+
+        private void textBox_ChsText_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == 13)
+            {
+                text.change(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()), textBox_ChsText.Text);
+                dataGridView.CurrentRow.Cells[4].Value = text.getChsText(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()));
+                if (状态着色ToolStripMenuItem.Checked)
+                {
+                    switch (text.getStatus(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString())))
+                    {
+                        case 0: dataGridView.CurrentRow.DefaultCellStyle.BackColor = Color.LightGreen; break;
+                        case 1: dataGridView.CurrentRow.DefaultCellStyle.BackColor = Color.Yellow; break;
+                        //case 2: thisRow.DefaultCellStyle.BackColor = Color.White; break;
+                        //default: thisRow.DefaultCellStyle.BackColor = Color.Black; break;
+                    }
+                }
+                if (dataGridView.CurrentCellAddress.Y < dataGridView.Rows.Count - 1) dataGridView.CurrentCell = dataGridView.Rows[dataGridView.CurrentRow.Index + 1].Cells[0];
+                e.Handled = true;
+            }
+        }
+
+        private void dataGridView_CurrentCellChanged(object sender, EventArgs e)
+        {
+            if (dataGridView.CurrentRow == null) return;
+            textBox_OriName.Text = dataGridView.CurrentRow.Cells[1].Value.ToString();
+            textBox_OriText.Text = dataGridView.CurrentRow.Cells[3].Value.ToString();
+            textBox_ChsName.Text = dataGridView.CurrentRow.Cells[2].Value.ToString();
+            textBox_ChsText.Text = dataGridView.CurrentRow.Cells[4].Value.ToString();
+        }
+
+        private void textBox_ChsText_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Up)
+            {
+                if (dataGridView.CurrentCellAddress.Y > 0) dataGridView.CurrentCell = dataGridView.Rows[dataGridView.CurrentRow.Index - 1].Cells[0];
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Down)
+            {
+                if (dataGridView.CurrentCellAddress.Y < dataGridView.Rows.Count - 1) dataGridView.CurrentCell = dataGridView.Rows[dataGridView.CurrentRow.Index + 1].Cells[0];
+                e.Handled = true;
+            }
         }
     }
 }

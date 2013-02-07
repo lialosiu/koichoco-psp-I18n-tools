@@ -35,7 +35,8 @@ namespace 恋选PSP文本处理器
             {
                 this.Status = 0;
                 if (this.ChsText.Length > this.OriText.Length) this.Status = 1;
-                if (this.ChsText.Length == 0) this.Status = 2;
+                if (this.ChsText.Length == 0 || this.ChsText == this.OriText) this.Status = 2;
+                if (this.ChsText.Length != 0 && (this.ChsText.Split('…').Length == ChsText.Length + 1)) this.Status = 0;
                 return this.Status;
             }
         }
@@ -122,9 +123,15 @@ namespace 恋选PSP文本处理器
         {
             return text[LineNum];
         }
-        public oneLineText[] getAll()
+        public oneLineText[] getAll_NOTNULL()
         {
-            return text;
+            ArrayList test = new ArrayList();
+            foreach (oneLineText thisLine in text)
+            {
+                if (thisLine != null)
+                    test.Add(thisLine);
+            }
+            return (oneLineText[])test.ToArray(typeof(oneLineText));
         }
 
         public Boolean resetText(CodeTable ori_codeTable)
@@ -180,7 +187,7 @@ namespace 恋选PSP文本处理器
                 }
 
                 //添加数据
-                this.add(lineNum, name.ToString(), "", text.ToString(), "");
+                this.add(lineNum, name.ToString(), name.ToString(), text.ToString(), text.ToString());
             }
             //完成
             textReader.Close();

@@ -59,12 +59,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AboutBox.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AboutBox.Designer.cs">
-      <DependentUpon>AboutBox.cs</DependentUpon>
-    </Compile>
     <Compile Include="Code_Word_Form.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -87,9 +81,6 @@
       <DependentUpon>StartLogo.cs</DependentUpon>
     </Compile>
     <Compile Include="Text.cs" />
-    <EmbeddedResource Include="AboutBox.resx">
-      <DependentUpon>AboutBox.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Code_Word_Form.resx">
       <DependentUpon>Code_Word_Form.cs</DependentUpon>
     </EmbeddedResource>

@@ -66,23 +66,34 @@
       <DependentUpon>Code_Word_Form.cs</DependentUpon>
     </Compile>
     <Compile Include="CodeTable.cs" />
+    <Compile Include="NameForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NameForm.Designer.cs">
+      <DependentUpon>NameForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="NameList.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SomeToolkit.cs" />
     <Compile Include="StartLogo.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="StartLogo.Designer.cs">
       <DependentUpon>StartLogo.cs</DependentUpon>
     </Compile>
-    <Compile Include="Text.cs" />
+    <Compile Include="TextList.cs" />
     <EmbeddedResource Include="Code_Word_Form.resx">
       <DependentUpon>Code_Word_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NameForm.resx">
+      <DependentUpon>NameForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

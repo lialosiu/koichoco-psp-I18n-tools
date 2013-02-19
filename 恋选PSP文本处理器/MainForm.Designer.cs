@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.导入文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -65,6 +65,7 @@
             this.dataGridView_ChsText = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel_Waiting = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
+            this.姓名处理ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.panel_ForOri.SuspendLayout();
@@ -104,33 +105,33 @@
             // 导入文本ToolStripMenuItem
             // 
             this.导入文本ToolStripMenuItem.Name = "导入文本ToolStripMenuItem";
-            this.导入文本ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.导入文本ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.导入文本ToolStripMenuItem.Text = "导入文本";
             this.导入文本ToolStripMenuItem.Click += new System.EventHandler(this.导入文本ToolStripMenuItem_Click);
             // 
             // 导出文本ToolStripMenuItem
             // 
             this.导出文本ToolStripMenuItem.Name = "导出文本ToolStripMenuItem";
-            this.导出文本ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.导出文本ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.导出文本ToolStripMenuItem.Text = "导出文本";
             this.导出文本ToolStripMenuItem.Click += new System.EventHandler(this.导出文本ToolStripMenuItem_Click);
             // 
             // 保存ToolStripMenuItem
             // 
             this.保存ToolStripMenuItem.Name = "保存ToolStripMenuItem";
-            this.保存ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.保存ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.保存ToolStripMenuItem.Text = "保存";
             this.保存ToolStripMenuItem.Click += new System.EventHandler(this.保存ToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(119, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // 退出ToolStripMenuItem
             // 
             this.退出ToolStripMenuItem.Name = "退出ToolStripMenuItem";
-            this.退出ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.退出ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.退出ToolStripMenuItem.Text = "退出";
             this.退出ToolStripMenuItem.Click += new System.EventHandler(this.退出ToolStripMenuItem_Click);
             // 
@@ -145,7 +146,7 @@
             // 刷新ToolStripMenuItem
             // 
             this.刷新ToolStripMenuItem.Name = "刷新ToolStripMenuItem";
-            this.刷新ToolStripMenuItem.Size = new System.Drawing.Size(98, 22);
+            this.刷新ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.刷新ToolStripMenuItem.Text = "刷新";
             this.刷新ToolStripMenuItem.Click += new System.EventHandler(this.刷新ToolStripMenuItem_Click);
             // 
@@ -181,7 +182,8 @@
             this.工具ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.初始化文本ToolStripMenuItem,
             this.查看码表ToolStripMenuItem,
-            this.生成Scbin与相应码表ToolStripMenuItem});
+            this.生成Scbin与相应码表ToolStripMenuItem,
+            this.姓名处理ToolStripMenuItem});
             this.工具ToolStripMenuItem.Name = "工具ToolStripMenuItem";
             this.工具ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
             this.工具ToolStripMenuItem.Text = "工具";
@@ -189,21 +191,21 @@
             // 初始化文本ToolStripMenuItem
             // 
             this.初始化文本ToolStripMenuItem.Name = "初始化文本ToolStripMenuItem";
-            this.初始化文本ToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.初始化文本ToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.初始化文本ToolStripMenuItem.Text = "初始化文本";
             this.初始化文本ToolStripMenuItem.Click += new System.EventHandler(this.初始化文本ToolStripMenuItem_Click);
             // 
             // 查看码表ToolStripMenuItem
             // 
             this.查看码表ToolStripMenuItem.Name = "查看码表ToolStripMenuItem";
-            this.查看码表ToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.查看码表ToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.查看码表ToolStripMenuItem.Text = "查看码表";
             this.查看码表ToolStripMenuItem.Click += new System.EventHandler(this.查看码表ToolStripMenuItem_Click);
             // 
             // 生成Scbin与相应码表ToolStripMenuItem
             // 
             this.生成Scbin与相应码表ToolStripMenuItem.Name = "生成Scbin与相应码表ToolStripMenuItem";
-            this.生成Scbin与相应码表ToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.生成Scbin与相应码表ToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.生成Scbin与相应码表ToolStripMenuItem.Text = "生成 sc.bin 与相应码表";
             this.生成Scbin与相应码表ToolStripMenuItem.Click += new System.EventHandler(this.生成Scbin与相应码表ToolStripMenuItem_Click);
             // 
@@ -220,19 +222,19 @@
             // 说明ToolStripMenuItem
             // 
             this.说明ToolStripMenuItem.Name = "说明ToolStripMenuItem";
-            this.说明ToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.说明ToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.说明ToolStripMenuItem.Text = "说明";
             this.说明ToolStripMenuItem.Click += new System.EventHandler(this.说明ToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(129, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(135, 6);
             // 
             // lOSStudioToolStripMenuItem
             // 
             this.lOSStudioToolStripMenuItem.Name = "lOSStudioToolStripMenuItem";
-            this.lOSStudioToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.lOSStudioToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.lOSStudioToolStripMenuItem.Text = "LOS Studio";
             this.lOSStudioToolStripMenuItem.Click += new System.EventHandler(this.lOSStudioToolStripMenuItem_Click);
             // 
@@ -331,8 +333,8 @@
             this.dataGridView.AllowUserToAddRows = false;
             this.dataGridView.AllowUserToDeleteRows = false;
             this.dataGridView.AllowUserToResizeRows = false;
-            dataGridViewCellStyle15.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.dataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.dataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             this.dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridView.BackgroundColor = System.Drawing.Color.White;
             this.dataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -418,13 +420,20 @@
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label1.Font = new System.Drawing.Font("XHei SimSun.ShinYaLan", 30F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 30F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.Location = new System.Drawing.Point(0, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(10, 0);
             this.label1.TabIndex = 0;
             this.label1.Text = "处理中，请稍候 m(_ _)m";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // 姓名处理ToolStripMenuItem
+            // 
+            this.姓名处理ToolStripMenuItem.Name = "姓名处理ToolStripMenuItem";
+            this.姓名处理ToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.姓名处理ToolStripMenuItem.Text = "姓名处理";
+            this.姓名处理ToolStripMenuItem.Click += new System.EventHandler(this.姓名处理ToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -496,6 +505,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridView_ChsText;
         private System.Windows.Forms.Panel panel_Waiting;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ToolStripMenuItem 姓名处理ToolStripMenuItem;
     }
 }
 

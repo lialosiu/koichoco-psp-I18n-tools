@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections;
-using System.Data;
-using System.Data.OleDb;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows.Forms;
-//using System.Runtime.InteropServices；
 
 namespace 恋选PSP文本处理器
 {
     public partial class MainForm : Form
-    { 
+    {
         CodeTable ori_CodeTable = new CodeTable();
-        Text text = new Text();
+        NameList namelist = new NameList();
+        TextList textlist = new TextList();
 
         public MainForm()
         {
@@ -33,17 +29,12 @@ namespace 恋选PSP文本处理器
             if (!ori_CodeTable.loadCodeTable()) MessageBox.Show("初始化码表错误");
 
             //读取文本
-            if (!text.readFromXML("Text.xml"))
+            if (!SomeToolkit.deserializeNameListFromFile("name.dat", ref namelist) || !SomeToolkit.deserializeTextListFromFile("text.dat", ref textlist))
             {
-                MessageBox.Show("XML数据出现错误，将初始化文本");
-                if (!text.resetText(ori_CodeTable))
-                {
-                    MessageBox.Show("初始化文本发生错误");
-                    Application.Exit();
-                }
-                text.writeToXML("Text.xml");
+                初始化文本ToolStripMenuItem_Click(null, null);
             }
-            reload_dataGridView();
+            else reload_dataGridView();
+            
             startlogo.Close();
         }
 
@@ -52,14 +43,14 @@ namespace 恋选PSP文本处理器
             panel_Waiting.Visible = true;
             panel_Waiting.Refresh();
             dataGridView.Rows.Clear();
-            foreach (Text.oneLineText thisLine in text.getAll_NOTNULL())
+            foreach (TextList.Text thisOne in textlist.getAll_NOTNULL())
             {
-                if (隐藏已翻译文本ToolStripMenuItem.Checked && thisLine.Status == 0) continue;
+                if (隐藏已翻译文本ToolStripMenuItem.Checked && thisOne.Status == 0) continue;
                 DataGridViewRow thisRow = new DataGridViewRow();
-                thisRow.CreateCells(dataGridView, thisLine.LineNum, thisLine.OriName, thisLine.ChsName, thisLine.OriText, thisLine.ChsText);
+                thisRow.CreateCells(dataGridView, thisOne.LineID, namelist.getOriName(thisOne.NameID), namelist.getChsName(thisOne.NameID), thisOne.OriText, thisOne.ChsText);
                 if (状态着色ToolStripMenuItem.Checked)
                 {
-                    switch (thisLine.Status)
+                    switch (thisOne.Status)
                     {
                         case 0: thisRow.DefaultCellStyle.BackColor = Color.LightGreen; break;
                         case 1: thisRow.DefaultCellStyle.BackColor = Color.Yellow; break;
@@ -80,13 +71,8 @@ namespace 恋选PSP文本处理器
         private void 初始化文本ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (DialogResult.No == MessageBox.Show(null, "将会清空并重建所有文本！确认？", "初始化文本", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2)) return;
-            text = new Text();
-            if (!text.resetText(ori_CodeTable))
-            {
-                MessageBox.Show("初始化文本发生错误");
-                Application.Exit();
-            }
-            text.writeToXML("Text.xml");
+            if (!SomeToolkit.initialize(ref namelist,ref textlist)) MessageBox.Show("见鬼了，初始化都能出错？你是不是动了码表_(:3」∠)_","错误");
+            mainToolStripStatusLabel.Text = "初始化完成";
             reload_dataGridView();
         }
         
@@ -102,7 +88,7 @@ namespace 恋选PSP文本处理器
             if (thisFile.ShowDialog() == DialogResult.OK)
             {
                 mainToolStripStatusLabel.Text = "正在导入，请稍候……";
-                Int32 lineCount = text.readFromTXT(thisFile.FileName);
+                Int32 lineCount = SomeToolkit.readFromTXT(thisFile.FileName, ref namelist, ref textlist);
                 reload_dataGridView();
                 MessageBox.Show(null, "成功导入了 " + lineCount + " 行文本", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 mainToolStripStatusLabel.Text = "导入完成";
@@ -116,7 +102,7 @@ namespace 恋选PSP文本处理器
             if (thisFile.ShowDialog() == DialogResult.OK)
             {
                 mainToolStripStatusLabel.Text = "正在导出";
-                if (!text.writeToTXT(thisFile.FileName))
+                if (!SomeToolkit.writeToTXT(thisFile.FileName, namelist, textlist))
                 {
                     MessageBox.Show(null, "未知原因导致的导出失败", "失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     mainToolStripStatusLabel.Text = "导出失败";
@@ -131,7 +117,8 @@ namespace 恋选PSP文本处理器
 
         private void 保存ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            text.writeToXML("Text.xml");
+            SomeToolkit.serializeNameListToFile("name.dat", namelist);
+            SomeToolkit.serializeTextListToFile("text.dat", textlist);
             mainToolStripStatusLabel.Text = "已保存";
         }
 
@@ -177,10 +164,12 @@ namespace 恋选PSP文本处理器
             panel_Waiting.Refresh();
             ArrayList usedWords = new ArrayList();
 
-            foreach (Text.oneLineText thisLine in text.getAll_NOTNULL())
+            foreach (TextList.Text thisOne in textlist.getAll_NOT2())
             {
-                foreach (Char thisWord_in_thisLine in thisLine.ChsName + thisLine.ChsText)
+                foreach (Char thisWord_in_thisLine in namelist.getChsName(thisOne.NameID) + thisOne.ChsText)
                 {
+                    if (ori_CodeTable.getWord(0) == thisWord_in_thisLine) continue; //0000，直接跳过
+                    if ('■' == thisWord_in_thisLine) continue;                     //0001，直接跳过
                     Boolean unUsed = true;
                     foreach (Char thisWord_in_usedWords in usedWords)
                     {
@@ -194,10 +183,13 @@ namespace 恋选PSP文本处理器
                 }
             }
             usedWords.Sort();
+
+            MessageBox.Show(usedWords.Count.ToString());
             
             CodeTable chs_CodeTable = new CodeTable();
 
             chs_CodeTable.addWord(ori_CodeTable.getWord(0));    //0000
+            chs_CodeTable.addWord('■');    //0001
             foreach (Char thisWord in usedWords)
             {
                 chs_CodeTable.addWord(thisWord);
@@ -219,6 +211,7 @@ namespace 恋选PSP文本处理器
             else
             {
                 MessageBox.Show("操作已取消");
+                panel_Waiting.Visible = false;
                 return;
             }
 
@@ -260,8 +253,8 @@ namespace 恋选PSP文本处理器
                             line_num = Convert.ToInt32(a_word_byte[1]) * 0x100 + Convert.ToInt32(a_word_byte[0]);
 
                             //获取当前行翻译后姓名与文本
-                            now_line_chs_name = text.getChsName(line_num);
-                            now_line_chs_text = text.getChsText(line_num);
+                            now_line_chs_name = namelist.getChsName(textlist.getNameID(line_num));
+                            now_line_chs_text = textlist.getChsText(line_num);
 
                             //姓名处理
                             Int32 Name_Length_Count = 0;
@@ -272,7 +265,14 @@ namespace 恋选PSP文本处理器
 
                                 output_file.Seek(sc_file_for_text.Position - 2, SeekOrigin.Begin);      //输出文件文本指针同步
                                 if (Name_Length_Count < now_line_chs_name.Length)
-                                    output_file.Write(chs_CodeTable.getCode(now_line_chs_name[Name_Length_Count++]), 0, 2);    //输出文本
+                                {
+                                    byte[] temp = chs_CodeTable.getCode(now_line_chs_name[Name_Length_Count++]);
+                                    if (temp == null)
+                                    {
+                                        temp = new byte[2]{01,00};
+                                    }
+                                    output_file.Write(temp, 0, 2);    //输出文本
+                                }
                                 else
                                     output_file.Write(new Byte[] { 0, 0 }, 0, 2);    //输出空白
                             }
@@ -284,7 +284,14 @@ namespace 恋选PSP文本处理器
                         output_file.Seek(sc_file_for_text.Position - 2, SeekOrigin.Begin);      //输出文件文本指针同步
 
                         if (Text_Length_Count < now_line_chs_text.Length)
-                            output_file.Write(chs_CodeTable.getCode(now_line_chs_text[Text_Length_Count++]), 0, 2);    //输出文本
+                        {
+                            byte[] temp = chs_CodeTable.getCode(now_line_chs_text[Text_Length_Count++]);
+                            if (temp == null)
+                            {
+                                temp = new byte[2]{01,00};
+                            }
+                            output_file.Write(temp, 0, 2);    //输出文本
+                        }
                         else
                             output_file.Write(new Byte[] { 0, 0 }, 0, 2);    //输出空白
                     }
@@ -324,6 +331,7 @@ namespace 恋选PSP文本处理器
             else
             {
                 MessageBox.Show("操作已取消");
+                panel_Waiting.Visible = false;
                 return;
             }
             MessageBox.Show("成功生成sc.bin与相应码表");
@@ -340,11 +348,11 @@ namespace 恋选PSP文本处理器
         {
             if (e.KeyChar == 13)
             {
-                text.change(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()), textBox_ChsText.Text);
-                dataGridView.CurrentRow.Cells[4].Value = text.getChsText(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()));
+                textlist.change(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()), textBox_ChsText.Text);
+                dataGridView.CurrentRow.Cells[4].Value = textlist.getChsText(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()));
                 if (状态着色ToolStripMenuItem.Checked)
                 {
-                    switch (text.getStatus(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString())))
+                    switch (textlist.getStatus(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString())))
                     {
                         case 0: dataGridView.CurrentRow.DefaultCellStyle.BackColor = Color.LightGreen; break;
                         case 1: dataGridView.CurrentRow.DefaultCellStyle.BackColor = Color.Yellow; break;
@@ -378,6 +386,12 @@ namespace 恋选PSP文本处理器
                 if (dataGridView.CurrentCellAddress.Y < dataGridView.Rows.Count - 1) dataGridView.CurrentCell = dataGridView.Rows[dataGridView.CurrentRow.Index + 1].Cells[0];
                 e.Handled = true;
             }
+        }
+
+        private void 姓名处理ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            NameForm nameForm = new NameForm(ref namelist);
+            nameForm.Show();
         }
     }
 }

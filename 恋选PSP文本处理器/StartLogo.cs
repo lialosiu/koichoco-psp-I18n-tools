@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace 恋选PSP文本处理器
+namespace 恋选PSP脚本处理器
 {
     public partial class StartLogo : Form
     {

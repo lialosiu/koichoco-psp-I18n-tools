@@ -1,4 +1,4 @@
-﻿namespace 恋选PSP文本处理器
+﻿namespace 恋选PSP脚本处理器
 {
     partial class MainForm
     {
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.导入文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -36,15 +36,14 @@
             this.保存ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.退出ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.编辑ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.刷新ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.选项ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.状态着色ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.隐藏已翻译文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.工具ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.初始化文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.查看码表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.生成Scbin与相应码表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.导入PC版TXT文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.姓名处理ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.初始化文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.帮助ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.说明ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
@@ -58,14 +57,8 @@
             this.panel_ForChs = new System.Windows.Forms.Panel();
             this.textBox_ChsName = new System.Windows.Forms.TextBox();
             this.dataGridView = new System.Windows.Forms.DataGridView();
-            this.dataGridView_LineNum = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridView_OriName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridView_ChsName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridView_OriText = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridView_ChsText = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel_Waiting = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
-            this.姓名处理ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.panel_ForOri.SuspendLayout();
@@ -80,7 +73,6 @@
             this.mainMenuStrip.GripMargin = new System.Windows.Forms.Padding(2);
             this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.文件ToolStripMenuItem,
-            this.编辑ToolStripMenuItem,
             this.选项ToolStripMenuItem,
             this.工具ToolStripMenuItem,
             this.帮助ToolStripMenuItem});
@@ -135,21 +127,6 @@
             this.退出ToolStripMenuItem.Text = "退出";
             this.退出ToolStripMenuItem.Click += new System.EventHandler(this.退出ToolStripMenuItem_Click);
             // 
-            // 编辑ToolStripMenuItem
-            // 
-            this.编辑ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.刷新ToolStripMenuItem});
-            this.编辑ToolStripMenuItem.Name = "编辑ToolStripMenuItem";
-            this.编辑ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
-            this.编辑ToolStripMenuItem.Text = "编辑";
-            // 
-            // 刷新ToolStripMenuItem
-            // 
-            this.刷新ToolStripMenuItem.Name = "刷新ToolStripMenuItem";
-            this.刷新ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.刷新ToolStripMenuItem.Text = "刷新";
-            this.刷新ToolStripMenuItem.Click += new System.EventHandler(this.刷新ToolStripMenuItem_Click);
-            // 
             // 选项ToolStripMenuItem
             // 
             this.选项ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -166,12 +143,11 @@
             this.状态着色ToolStripMenuItem.Name = "状态着色ToolStripMenuItem";
             this.状态着色ToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
             this.状态着色ToolStripMenuItem.Text = "状态着色";
+            this.状态着色ToolStripMenuItem.CheckedChanged += new System.EventHandler(this.状态着色ToolStripMenuItem_CheckedChanged);
             this.状态着色ToolStripMenuItem.Click += new System.EventHandler(this.状态着色ToolStripMenuItem_Click);
             // 
             // 隐藏已翻译文本ToolStripMenuItem
             // 
-            this.隐藏已翻译文本ToolStripMenuItem.Checked = true;
-            this.隐藏已翻译文本ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.隐藏已翻译文本ToolStripMenuItem.Name = "隐藏已翻译文本ToolStripMenuItem";
             this.隐藏已翻译文本ToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
             this.隐藏已翻译文本ToolStripMenuItem.Text = "隐藏已翻译文本";
@@ -180,34 +156,41 @@
             // 工具ToolStripMenuItem
             // 
             this.工具ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.初始化文本ToolStripMenuItem,
-            this.查看码表ToolStripMenuItem,
             this.生成Scbin与相应码表ToolStripMenuItem,
-            this.姓名处理ToolStripMenuItem});
+            this.导入PC版TXT文本ToolStripMenuItem,
+            this.姓名处理ToolStripMenuItem,
+            this.初始化文本ToolStripMenuItem});
             this.工具ToolStripMenuItem.Name = "工具ToolStripMenuItem";
             this.工具ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
             this.工具ToolStripMenuItem.Text = "工具";
             // 
-            // 初始化文本ToolStripMenuItem
-            // 
-            this.初始化文本ToolStripMenuItem.Name = "初始化文本ToolStripMenuItem";
-            this.初始化文本ToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
-            this.初始化文本ToolStripMenuItem.Text = "初始化文本";
-            this.初始化文本ToolStripMenuItem.Click += new System.EventHandler(this.初始化文本ToolStripMenuItem_Click);
-            // 
-            // 查看码表ToolStripMenuItem
-            // 
-            this.查看码表ToolStripMenuItem.Name = "查看码表ToolStripMenuItem";
-            this.查看码表ToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
-            this.查看码表ToolStripMenuItem.Text = "查看码表";
-            this.查看码表ToolStripMenuItem.Click += new System.EventHandler(this.查看码表ToolStripMenuItem_Click);
-            // 
             // 生成Scbin与相应码表ToolStripMenuItem
             // 
             this.生成Scbin与相应码表ToolStripMenuItem.Name = "生成Scbin与相应码表ToolStripMenuItem";
-            this.生成Scbin与相应码表ToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
-            this.生成Scbin与相应码表ToolStripMenuItem.Text = "生成 sc.bin 与相应码表";
-            this.生成Scbin与相应码表ToolStripMenuItem.Click += new System.EventHandler(this.生成Scbin与相应码表ToolStripMenuItem_Click);
+            this.生成Scbin与相应码表ToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.生成Scbin与相应码表ToolStripMenuItem.Text = "生成 sc.bin 和 lt.bin";
+            this.生成Scbin与相应码表ToolStripMenuItem.Click += new System.EventHandler(this.生成scbin和ltbinToolStripMenuItem_Click);
+            // 
+            // 导入PC版TXT文本ToolStripMenuItem
+            // 
+            this.导入PC版TXT文本ToolStripMenuItem.Name = "导入PC版TXT文本ToolStripMenuItem";
+            this.导入PC版TXT文本ToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.导入PC版TXT文本ToolStripMenuItem.Text = "导入PC版TXT文本";
+            this.导入PC版TXT文本ToolStripMenuItem.Click += new System.EventHandler(this.导入PC版TXT文本ToolStripMenuItem_Click);
+            // 
+            // 姓名处理ToolStripMenuItem
+            // 
+            this.姓名处理ToolStripMenuItem.Name = "姓名处理ToolStripMenuItem";
+            this.姓名处理ToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.姓名处理ToolStripMenuItem.Text = "姓名处理";
+            this.姓名处理ToolStripMenuItem.Click += new System.EventHandler(this.姓名处理ToolStripMenuItem_Click);
+            // 
+            // 初始化文本ToolStripMenuItem
+            // 
+            this.初始化文本ToolStripMenuItem.Name = "初始化文本ToolStripMenuItem";
+            this.初始化文本ToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.初始化文本ToolStripMenuItem.Text = "初始化文本";
+            this.初始化文本ToolStripMenuItem.Click += new System.EventHandler(this.初始化文本ToolStripMenuItem_Click);
             // 
             // 帮助ToolStripMenuItem
             // 
@@ -333,17 +316,11 @@
             this.dataGridView.AllowUserToAddRows = false;
             this.dataGridView.AllowUserToDeleteRows = false;
             this.dataGridView.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.dataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.dataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridView.BackgroundColor = System.Drawing.Color.White;
             this.dataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.dataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridView_LineNum,
-            this.dataGridView_OriName,
-            this.dataGridView_ChsName,
-            this.dataGridView_OriText,
-            this.dataGridView_ChsText});
             this.dataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView.GridColor = System.Drawing.Color.Silver;
             this.dataGridView.Location = new System.Drawing.Point(0, 24);
@@ -355,52 +332,8 @@
             this.dataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView.Size = new System.Drawing.Size(784, 256);
             this.dataGridView.TabIndex = 7;
+            this.dataGridView.DataSourceChanged += new System.EventHandler(this.dataGridView_DataSourceChanged);
             this.dataGridView.CurrentCellChanged += new System.EventHandler(this.dataGridView_CurrentCellChanged);
-            // 
-            // dataGridView_LineNum
-            // 
-            this.dataGridView_LineNum.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.dataGridView_LineNum.HeaderText = "行号";
-            this.dataGridView_LineNum.MaxInputLength = 5;
-            this.dataGridView_LineNum.MinimumWidth = 40;
-            this.dataGridView_LineNum.Name = "dataGridView_LineNum";
-            this.dataGridView_LineNum.ReadOnly = true;
-            this.dataGridView_LineNum.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView_LineNum.Width = 40;
-            // 
-            // dataGridView_OriName
-            // 
-            this.dataGridView_OriName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.dataGridView_OriName.HeaderText = "原名";
-            this.dataGridView_OriName.MinimumWidth = 110;
-            this.dataGridView_OriName.Name = "dataGridView_OriName";
-            this.dataGridView_OriName.ReadOnly = true;
-            this.dataGridView_OriName.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView_OriName.Width = 110;
-            // 
-            // dataGridView_ChsName
-            // 
-            this.dataGridView_ChsName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.dataGridView_ChsName.HeaderText = "译名";
-            this.dataGridView_ChsName.MinimumWidth = 110;
-            this.dataGridView_ChsName.Name = "dataGridView_ChsName";
-            this.dataGridView_ChsName.ReadOnly = true;
-            this.dataGridView_ChsName.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView_ChsName.Width = 110;
-            // 
-            // dataGridView_OriText
-            // 
-            this.dataGridView_OriText.FillWeight = 99.61929F;
-            this.dataGridView_OriText.HeaderText = "原文";
-            this.dataGridView_OriText.Name = "dataGridView_OriText";
-            this.dataGridView_OriText.ReadOnly = true;
-            // 
-            // dataGridView_ChsText
-            // 
-            this.dataGridView_ChsText.FillWeight = 99.61929F;
-            this.dataGridView_ChsText.HeaderText = "译文";
-            this.dataGridView_ChsText.Name = "dataGridView_ChsText";
-            this.dataGridView_ChsText.ReadOnly = true;
             // 
             // panel_Waiting
             // 
@@ -428,13 +361,6 @@
             this.label1.Text = "处理中，请稍候 m(_ _)m";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // 姓名处理ToolStripMenuItem
-            // 
-            this.姓名处理ToolStripMenuItem.Name = "姓名处理ToolStripMenuItem";
-            this.姓名处理ToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
-            this.姓名处理ToolStripMenuItem.Text = "姓名处理";
-            this.姓名处理ToolStripMenuItem.Click += new System.EventHandler(this.姓名处理ToolStripMenuItem_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -450,7 +376,8 @@
             this.MinimumSize = new System.Drawing.Size(800, 500);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "恋选PSP文本处理器";
+            this.Text = "恋选PSP脚本处理器 Ver 0.48 Bata";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.mainMenuStrip.ResumeLayout(false);
             this.mainMenuStrip.PerformLayout();
@@ -478,7 +405,6 @@
         private System.Windows.Forms.TextBox textBox_OriText;
         private System.Windows.Forms.Panel panel_ForOri;
         private System.Windows.Forms.TextBox textBox_ChsText;
-        private System.Windows.Forms.ToolStripMenuItem 查看码表ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 初始化文本ToolStripMenuItem;
         private System.Windows.Forms.ToolStripStatusLabel mainToolStripStatusLabel;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
@@ -494,18 +420,12 @@
         private System.Windows.Forms.ToolStripMenuItem 选项ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 状态着色ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 隐藏已翻译文本ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 编辑ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 刷新ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 生成Scbin与相应码表ToolStripMenuItem;
         private System.Windows.Forms.DataGridView dataGridView;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridView_LineNum;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridView_OriName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridView_ChsName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridView_OriText;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridView_ChsText;
         private System.Windows.Forms.Panel panel_Waiting;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ToolStripMenuItem 姓名处理ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 导入PC版TXT文本ToolStripMenuItem;
     }
 }
 

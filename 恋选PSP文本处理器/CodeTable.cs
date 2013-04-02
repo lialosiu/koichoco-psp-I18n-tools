@@ -7,56 +7,55 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace 恋选PSP文本处理器
+namespace 恋选PSP脚本处理器
 {
     public class CodeTable
     {
-        Int32 wordCount = 0;
-        Char[] word = new Char[0xFFFF];
-        public void addWord(Char word)
+        Dictionary<Int32, Char> code2character = new Dictionary<Int32, Char>();
+        Dictionary<Char, Int32> character2code = new Dictionary<Char, Int32>();
+
+        //设置某个Code的Character
+        public void setCharacter(Int32 code, Char character)
         {
-            this.word[wordCount++] = word;
+            if (!code2character.ContainsKey(code))
+                code2character.Add(code, character);
+            if (!character2code.ContainsKey(character))
+                character2code.Add(character, code);
         }
-        public void setWord(Int32 code, Char word)
+
+        //通过Code获取字符
+        public Char getCharacter(Int32 code)
         {
-            wordCount++;
-            this.word[code] = word;
+            Char thisCharacter = code2character[code];
+            return thisCharacter;
         }
-        public Char getWord(Int32 code)
+
+        //通过字符获取Code
+        public Byte[] getCode(Char character)
         {
-            return this.word[code];
+            if (!character2code.ContainsKey(character))
+                return null;
+            Int32 thisCode = character2code[character];
+            return new Byte[] { (Byte)(thisCode % 0x100), (Byte)(thisCode / 0x100) };
         }
-        public Byte[] getCode(Char word)
+
+        //获取原始码表
+        public static CodeTable getOriCodeTable()
         {
-            for (int i=0;i<0xffff;i++)
-            {
-                if (word == this.word[i])
-                    return new Byte[] { (Byte)(i % 0x100), (Byte)(i / 0x100) };
-            }
-            return null;
-        }
-        public Boolean loadCodeTable()
-        {
-            try
-            {
-                if (wordCount != 0) throw new Exception();
-                XDocument doc = XDocument.Load(Assembly.GetExecutingAssembly().GetManifestResourceStream("恋选PSP文本处理器.Files.Ori_CodeTable.xml"));
-                var ele =
-                    from item in doc.Descendants("项目")
-                    select new
-                    {
-                        code1 = item.Attribute("码1").Value,
-                        code2 = item.Attribute("码2").Value,
-                        word = item.Attribute("字").Value
-                    };
-                foreach (var att in ele)
-                    this.setWord(Int32.Parse(att.code2 + att.code1, System.Globalization.NumberStyles.AllowHexSpecifier), Convert.ToChar(att.word));
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            CodeTable thisOriCodeTable = new CodeTable();
+            if (!File.Exists("OriCodeTable.xml")) throw new FileNotFoundException();
+            XDocument doc = XDocument.Load("OriCodeTable.xml");
+            var ele =
+                from item in doc.Descendants("项目")
+                select new
+                {
+                    code1 = item.Attribute("码1").Value,
+                    code2 = item.Attribute("码2").Value,
+                    word = item.Attribute("字").Value
+                };
+            foreach (var att in ele)
+                thisOriCodeTable.setCharacter(Int32.Parse(att.code2 + att.code1, System.Globalization.NumberStyles.AllowHexSpecifier), Convert.ToChar(att.word));
+            return thisOriCodeTable;
         }
     }
 }

@@ -7,8 +7,8 @@
     <ProjectGuid>{A74311A6-8E8B-468D-81CF-3A5DCB9ADD7D}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>恋选PSP文本处理器</RootNamespace>
-    <AssemblyName>恋选PSP文本处理器</AssemblyName>
+    <RootNamespace>恋选PSP脚本处理器</RootNamespace>
+    <AssemblyName>恋选PSP脚本处理器</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -46,6 +46,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -59,12 +62,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Code_Word_Form.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Code_Word_Form.Designer.cs">
-      <DependentUpon>Code_Word_Form.cs</DependentUpon>
-    </Compile>
     <Compile Include="CodeTable.cs" />
     <Compile Include="NameForm.cs">
       <SubType>Form</SubType>
@@ -78,20 +75,16 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="NameList.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SomeToolkit.cs" />
+    <Compile Include="GameText.cs" />
+    <Compile Include="Toolkit.cs" />
     <Compile Include="StartLogo.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="StartLogo.Designer.cs">
       <DependentUpon>StartLogo.cs</DependentUpon>
     </Compile>
-    <Compile Include="TextList.cs" />
-    <EmbeddedResource Include="Code_Word_Form.resx">
-      <DependentUpon>Code_Word_Form.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="NameForm.resx">
       <DependentUpon>NameForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -108,7 +101,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="Files\sc.bin" />
     <EmbeddedResource Include="StartLogo.resx">
       <DependentUpon>StartLogo.cs</DependentUpon>
     </EmbeddedResource>
@@ -143,13 +135,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\koichoco_psp_editer_logo.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Properties\DataSources\" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Files\Ori_CodeTable.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

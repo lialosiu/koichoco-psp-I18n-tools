@@ -1,4 +1,4 @@
-﻿namespace 恋选PSP文本处理器
+﻿namespace 恋选PSP脚本处理器
 {
     partial class StartLogo
     {
@@ -46,7 +46,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "恋选PSP文本处理器启动中……";
+            this.Text = "恋选PSP脚本处理器启动中……";
             this.ResumeLayout(false);
 
         }

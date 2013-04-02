@@ -6,11 +6,11 @@ using System.Resources;
 // 有关程序集的常规信息通过以下
 // 特性集控制。更改这些特性值可修改
 // 与程序集关联的信息。
-[assembly: AssemblyTitle("恋选PSP文本处理器")]
+[assembly: AssemblyTitle("恋选PSP脚本处理器")]
 [assembly: AssemblyDescription("恋爱选举巧克力PSP版-中文化计划专用文本处理器")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("LOS Studio")]
-[assembly: AssemblyProduct("恋选PSP文本处理器")]
+[assembly: AssemblyProduct("恋选PSP脚本处理器")]
 [assembly: AssemblyCopyright("Powered by Lialosiu")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

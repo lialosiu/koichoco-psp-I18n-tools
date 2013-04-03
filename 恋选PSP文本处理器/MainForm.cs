@@ -9,12 +9,13 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace 恋选PSP脚本处理器
+namespace 恋选PSP文本处理器
 {
     public partial class MainForm : Form
     {
-        CodeTable oriCodeTable = CodeTable.getOriCodeTable();
-        GameText gameText = new GameText();
+        CodeTable oriCodeTable;
+        GameText gameText;
+        Boolean successLoad = false;
 
         public MainForm()
         {
@@ -27,31 +28,80 @@ namespace 恋选PSP脚本处理器
             startlogo.Show();
             panel_Waiting.Size = this.Size;
 
+            if (!File.Exists("OriCodeTable.xml"))
+            {
+                MessageBox.Show(null, "找不到码表文件OriCodeTable.xml", "启动失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Dispose();
+                Application.Exit();
+                return;
+            }
+
+            if (!File.Exists("sc.bin"))
+            {
+                MessageBox.Show(null, "找不到原始脚本文件sc.bin", "启动失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Dispose();
+                Application.Exit();
+                return;
+            }
+
+            if (!File.Exists("lt.bin"))
+            {
+                MessageBox.Show(null, "找不到原始字库文件lt.bin", "启动失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Dispose();
+                Application.Exit();
+                return;
+            }
+
+            this.oriCodeTable = CodeTable.getOriCodeTable();
+            this.gameText = new GameText();
+
             //读取文本
             if (!Toolkit.deserializeTextListFromFile("Data.dat", ref gameText))
             {
                 gameText = GameText.InitGameTextFactory();
-                dataGridView.DataSource = gameText.getAllAsDataTable();
             }
-            else Reload_DataGridView();
+
+            Reload_DataGridView();
 
             startlogo.Close();
+            successLoad = true;
         }
 
         private void Reload_DataGridView()
         {
             panel_Waiting.Visible = true;
             panel_Waiting.Update();
+
+            dataGridView.Rows.Clear();
+
+            List<GameText.Line> thisGameTextList;
             if (隐藏已翻译文本ToolStripMenuItem.Checked == true)
-                dataGridView.DataSource = gameText.getStatusNotZeroAsDataTable();
+            {
+                thisGameTextList = this.gameText.getAllNot2AsList();
+            }
             else
-                dataGridView.DataSource = gameText.getAllAsDataTable();
-            dataGridView.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dataGridView.Columns[0].Width = 40;
-            dataGridView.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dataGridView.Columns[1].Width = 150;
-            dataGridView.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dataGridView.Columns[2].Width = 150;
+            {
+                thisGameTextList = this.gameText.getAllAsList();
+            }
+
+            foreach (GameText.Line thisLine in thisGameTextList)
+            {
+                DataGridViewRow thisDataGridViewRow = new DataGridViewRow();
+                thisDataGridViewRow.CreateCells(dataGridView, thisLine.id, thisLine.oriName, thisLine.chsName, thisLine.oriSentences, thisLine.chsSentences);
+
+                if (状态着色ToolStripMenuItem.Checked == true)
+                {
+                    switch (gameText.getLinebyID(thisLine.id).status)
+                    {
+                        case 0: thisDataGridViewRow.DefaultCellStyle.BackColor = Color.LightGreen; break;
+                        case 1: thisDataGridViewRow.DefaultCellStyle.BackColor = Color.Yellow; break;
+                        //case 2: thisRow.DefaultCellStyle.BackColor = Color.White; break;
+                        //default: thisRow.DefaultCellStyle.BackColor = Color.Black; break;
+                    }
+                }
+                dataGridView.Rows.Add(thisDataGridViewRow);
+            }
+            dataGridView.Select();
             panel_Waiting.Visible = false;
         }
 
@@ -170,6 +220,7 @@ namespace 恋选PSP脚本处理器
             {
                 FileStream oriFileStream_ltbin = File.Open(@"lt.bin", FileMode.Open, FileAccess.Read);
                 FileStream outputFileStream_ltbin = new FileStream(output_ltbin.FileName, FileMode.Create, FileAccess.ReadWrite);
+                //StreamWriter codetabletxt = new StreamWriter(File.Open("codetable.txt",FileMode.Create,FileAccess.Write),Encoding.Unicode);
                 oriFileStream_ltbin.CopyTo(outputFileStream_ltbin);
                 outputFileStream_ltbin.Seek(0, SeekOrigin.Begin);
 
@@ -180,14 +231,13 @@ namespace 恋选PSP脚本处理器
                     Char thisChar = lastCharList[i];
                     chsCodeTable.setCharacter(i, thisChar);
                     List<Byte> thisBytes = Toolkit.Character2Bytes(thisChar, new Font("微软雅黑", 10));
-
                     outputFileBinaryWriter_ltbin.Write(thisBytes.ToArray());
 
-                    //  输出码表文件用
-                    //output_TheCodeWordFile.WriteLine((i % 0x100).ToString("X2") + (i / 0x100).ToString("X2") + "=" + thisChar);
+                    //codetabletxt.WriteLine((i % 0x100).ToString("X2") + (i / 0x100).ToString("X2") + "=" + thisChar);
                 }
 
                 oriFileStream_ltbin.Close();
+                //codetabletxt.Close();
 
                 Toolkit.updateTheVerifyCode(outputFileStream_ltbin);
 
@@ -217,6 +267,14 @@ namespace 恋选PSP脚本处理器
                 FileStream outputFileStream_scbin = new FileStream(output_scbin.FileName, FileMode.Create, FileAccess.ReadWrite);
                 oriFileStream_scbin.CopyTo(outputFileStream_scbin);
 
+                Boolean normalTextEnd = false;
+                Boolean startAChoose = true;
+
+                Int32 _ID = 0;
+                String _ChsName;
+                String _ChsSentences;
+                Int32 SentencesCharIndex = 0;
+
                 while (true)
                 {
                     _Bytes = new Byte[4];
@@ -224,86 +282,172 @@ namespace 恋选PSP脚本处理器
                     oriFileStream_scbin.Read(_Bytes, 0, 4);
                     offsetTextPoint = oriFileStream_scbin.Position;
 
-                    //换算文本指针所指地址
-                    offsetText = 0x30000 + Convert.ToInt32(_Bytes[3]) * 0x100 * 0x100 * 0x100 + Convert.ToInt32(_Bytes[2]) * 0x100 * 0x100 + Convert.ToInt32(_Bytes[1]) * 0x100 + Convert.ToInt32(_Bytes[0]);
-
-                    if (offsetText <= 0x30000) break;   //文本指针结束
-
-                    oriFileStream_scbin.Seek(offsetText, SeekOrigin.Begin);   //根据当前文本指针跳至文本位置
-
-                    Int32 _ID = 0;
-                    String _ChsName = null;
-                    String _ChsSentences = null;
-
-                    Int32 SentencesCharIndex = 0;
-
-                    _Bytes = new Byte[2];
-
-                    while (true)
+                    //普通文本指针结束
+                    if (normalTextEnd == false && offsetTextPoint > 0x2C568)
                     {
-                        oriFileStream_scbin.Read(_Bytes, 0, 2);
+                        offsetTextPoint = 0x2C570;
+                        normalTextEnd = true;
+                        continue;
+                    }
 
-                        //入口标记
-                        if (_Bytes[0] == 0xF0 && _Bytes[1] == 0xFF)
+                    //所有结束
+                    if (offsetTextPoint > 0x2C7B0)
+                    {
+                        break;
+                    }
+
+                    if (normalTextEnd == false)
+                    {
+                        //处理普通文本
+
+                        //换算文本指针所指地址
+                        offsetText = 0x30000 + Convert.ToInt32(_Bytes[3]) * 0x100 * 0x100 * 0x100 + Convert.ToInt32(_Bytes[2]) * 0x100 * 0x100 + Convert.ToInt32(_Bytes[1]) * 0x100 + Convert.ToInt32(_Bytes[0]);
+                        //根据当前文本指针跳至文本位置
+                        oriFileStream_scbin.Seek(offsetText, SeekOrigin.Begin);
+
+                        _ID = 0;
+                        _ChsName = null;
+                        _ChsSentences = null;
+
+                        SentencesCharIndex = 0;
+
+                        _Bytes = new Byte[2];
+
+                        while (true)
                         {
-                            //读取ID
                             oriFileStream_scbin.Read(_Bytes, 0, 2);
-                            _ID = Convert.ToInt32(_Bytes[1]) * 0x100 + Convert.ToInt32(_Bytes[0]);
 
-                            //获取当前行翻译后姓名与文本
-                            _ChsName = gameText.getChsNamebyID(_ID);
-                            _ChsSentences = gameText.getChsSentencesbyID(_ID);
-
-                            Int32 NameCharIndex = 0;
-
-                            //姓名处理
-                            while (true)
+                            //入口标记
+                            if (_Bytes[0] == 0xF0 && _Bytes[1] == 0xFF)
                             {
+                                //读取ID
                                 oriFileStream_scbin.Read(_Bytes, 0, 2);
-                                if (_Bytes[0] == 0xff && _Bytes[1] == 0xff) break;      //正文入口标记，结束姓名处理
-                                outputFileStream_scbin.Seek(oriFileStream_scbin.Position - 2, SeekOrigin.Begin);      //输出文件指针同步
+                                _ID = Convert.ToInt32(_Bytes[1]) * 0x100 + Convert.ToInt32(_Bytes[0]);
 
-                                _Bytes = new Byte[] { 0x00, 0x00 };
+                                //获取当前行翻译后姓名与文本
+                                _ChsName = gameText.getChsNamebyID(_ID);
+                                _ChsSentences = gameText.getChsSentencesbyID(_ID);
 
-                                if (NameCharIndex < _ChsName.Length)
+                                Int32 NameCharIndex = 0;
+
+                                //姓名处理
+                                while (true)
                                 {
-                                    Byte[] thisCodeByte = chsCodeTable.getCode(_ChsName[NameCharIndex++]);
-                                    _Bytes = thisCodeByte == null ? new Byte[] { 0x60, 0x00 } : thisCodeByte;      //0060,'■'
+                                    oriFileStream_scbin.Read(_Bytes, 0, 2);
+                                    if (_Bytes[0] == 0xff && _Bytes[1] == 0xff) break;      //正文入口标记，结束姓名处理
+                                    outputFileStream_scbin.Seek(oriFileStream_scbin.Position - 2, SeekOrigin.Begin);      //输出文件指针同步
+
+                                    _Bytes = new Byte[] { 0x00, 0x00 };
+
+                                    if (NameCharIndex < _ChsName.Length)
+                                    {
+                                        Byte[] thisCodeByte = chsCodeTable.getCode(_ChsName[NameCharIndex++]);
+                                        _Bytes = thisCodeByte == null ? new Byte[] { 0x60, 0x00 } : thisCodeByte;      //0060,'■'
+                                    }
+                                    outputFileStream_scbin.Write(_Bytes, 0, 2);
                                 }
-                                outputFileStream_scbin.Write(_Bytes, 0, 2);
+                                continue;
                             }
+
+                            //强制换行标记？貌似在那个小游戏上面是换行的……
+                            if (_Bytes[0] == 0xFE && _Bytes[1] == 0xFF)
+                            {
+                                continue;
+                            }
+
+                            //结束标记
+                            if (_Bytes[0] == 0xFB && _Bytes[1] == 0xFF)
+                            {
+                                break;
+                            }
+
+                            //结束标记(不刷新)
+                            if (_Bytes[0] == 0xFD && _Bytes[1] == 0xFF)
+                            {
+                                break;
+                            }
+
+                            //输出文件文本指针同步
+                            outputFileStream_scbin.Seek(oriFileStream_scbin.Position - 2, SeekOrigin.Begin);
+
+                            _Bytes = new Byte[] { 0x00, 0x00 };
+
+                            if (SentencesCharIndex < _ChsSentences.Length)
+                            {
+                                Byte[] thisCodeByte = chsCodeTable.getCode(_ChsSentences[SentencesCharIndex++]);
+                                _Bytes = thisCodeByte == null ? new Byte[] { 0x60, 0x00 } : thisCodeByte;      //0060,'■'
+                            }
+                            outputFileStream_scbin.Write(_Bytes, 0, 2);
+                        }
+                    }
+                    else
+                    {
+                        //处理选项文本
+
+                        //换算文本指针所指地址
+                        offsetText = 0x30000 + Convert.ToInt32(_Bytes[3]) * 0x100 * 0x100 * 0x100 + Convert.ToInt32(_Bytes[2]) * 0x100 * 0x100 + Convert.ToInt32(_Bytes[1]) * 0x100 + Convert.ToInt32(_Bytes[0]);
+
+                        if (offsetText == 0x30000)
+                        {
+                            startAChoose = true;
                             continue;
                         }
 
-                        //强制换行标记？貌似在那个小游戏上面是换行的……
-                        if (_Bytes[0] == 0xFE && _Bytes[1] == 0xFF)
+                        if (startAChoose)
                         {
-                            continue;
+                            oriFileStream_scbin.Read(_Bytes, 0, 4);
+                            offsetTextPoint = oriFileStream_scbin.Position;
+                            offsetText = 0x30000 + Convert.ToInt32(_Bytes[3]) * 0x100 * 0x100 * 0x100 + Convert.ToInt32(_Bytes[2]) * 0x100 * 0x100 + Convert.ToInt32(_Bytes[1]) * 0x100 + Convert.ToInt32(_Bytes[0]);
+                            startAChoose = false;
                         }
 
-                        //结束标记
-                        if (_Bytes[0] == 0xFB && _Bytes[1] == 0xFF)
+                        //根据当前文本指针跳至文本位置
+                        oriFileStream_scbin.Seek(offsetText, SeekOrigin.Begin);
+
+                        //读取ID
+                        while (true)
                         {
-                            break;
+                            oriFileStream_scbin.Read(_Bytes, 0, 2);
+
+                            if (_Bytes[0] == 0xFF && _Bytes[1] == 0xFF)     //结束标记
+                            {
+                                oriFileStream_scbin.Read(_Bytes, 0, 4);
+
+                                //自定义ID，读取的ID号+9W
+                                _ID = 90000 + Convert.ToInt32(_Bytes[3]) * 0x100 + Convert.ToInt32(_Bytes[2]);
+                                break;
+                            }
                         }
 
-                        //结束标记(不刷新)
-                        if (_Bytes[0] == 0xFD && _Bytes[1] == 0xFF)
+                        //根据当前文本指针跳至文本位置
+                        oriFileStream_scbin.Seek(offsetText, SeekOrigin.Begin);
+
+                        //获取选项译文
+                        _ChsSentences = gameText.getChsSentencesbyID(_ID);
+
+                        SentencesCharIndex = 0;
+
+                        //输出文本
+                        while (true)
                         {
-                            break;
+                            oriFileStream_scbin.Read(_Bytes, 0, 2);
+
+                            //输出文件文本指针同步
+                            outputFileStream_scbin.Seek(oriFileStream_scbin.Position - 2, SeekOrigin.Begin);
+
+                            if (_Bytes[0] == 0xFF && _Bytes[1] == 0xFF)     //结束标记
+                            {
+                                break;
+                            }
+
+                            _Bytes = new Byte[] { 0x00, 0x00 };
+                            if (SentencesCharIndex < _ChsSentences.Length)
+                            {
+                                Byte[] thisCodeByte = chsCodeTable.getCode(_ChsSentences[SentencesCharIndex++]);
+                                _Bytes = thisCodeByte == null ? new Byte[] { 0x60, 0x00 } : thisCodeByte;      //0060,'■'
+                            }
+                            outputFileStream_scbin.Write(_Bytes, 0, 2);
                         }
-
-                        //输出文件文本指针同步
-                        outputFileStream_scbin.Seek(oriFileStream_scbin.Position - 2, SeekOrigin.Begin);
-
-                        _Bytes = new Byte[] { 0x00, 0x00 };
-
-                        if (SentencesCharIndex < _ChsSentences.Length)
-                        {
-                            Byte[] thisCodeByte = chsCodeTable.getCode(_ChsSentences[SentencesCharIndex++]);
-                            _Bytes = thisCodeByte == null ? new Byte[] { 0x60, 0x00 } : thisCodeByte;      //0060,'■'
-                        }
-                        outputFileStream_scbin.Write(_Bytes, 0, 2);
                     }
                 }
 
@@ -430,26 +574,11 @@ namespace 恋选PSP脚本处理器
             }
         }
 
-        private void dataGridView_DataSourceChanged(object sender, EventArgs e)
-        {
-            if (状态着色ToolStripMenuItem.Checked == false) return;
-            foreach (DataGridViewRow thisRow in dataGridView.Rows)
-            {
-                switch (gameText.getLinebyID(Int32.Parse(thisRow.Cells[0].Value.ToString())).status)
-                {
-                    case 0: this.dataGridView.Rows[thisRow.Index].DefaultCellStyle.BackColor = Color.LightGreen; break;
-                    case 1: this.dataGridView.Rows[thisRow.Index].DefaultCellStyle.BackColor = Color.Yellow; break;
-                    //case 2: thisRow.DefaultCellStyle.BackColor = Color.White; break;
-                    //default: thisRow.DefaultCellStyle.BackColor = Color.Black; break;
-                }
-            }
-        }
-
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (DialogResult.Yes == MessageBox.Show(null, "是否保存数据？", "退出", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2))
+            if (successLoad && DialogResult.Yes == MessageBox.Show(null, "是否保存数据？", "退出", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2))
             {
-                保存ToolStripMenuItem_Click(sender,null);
+                保存ToolStripMenuItem_Click(sender, null);
             }
         }
 

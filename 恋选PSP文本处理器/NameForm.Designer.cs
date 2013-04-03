@@ -1,4 +1,4 @@
-﻿namespace 恋选PSP脚本处理器
+﻿namespace 恋选PSP文本处理器
 {
     partial class NameForm
     {

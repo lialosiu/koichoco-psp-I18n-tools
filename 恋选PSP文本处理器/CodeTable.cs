@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace 恋选PSP脚本处理器
+namespace 恋选PSP文本处理器
 {
     public class CodeTable
     {
@@ -43,7 +43,6 @@ namespace 恋选PSP脚本处理器
         public static CodeTable getOriCodeTable()
         {
             CodeTable thisOriCodeTable = new CodeTable();
-            if (!File.Exists("OriCodeTable.xml")) throw new FileNotFoundException();
             XDocument doc = XDocument.Load("OriCodeTable.xml");
             var ele =
                 from item in doc.Descendants("项目")

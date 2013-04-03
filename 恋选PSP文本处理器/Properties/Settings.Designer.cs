@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace 恋选PSP脚本处理器.Properties {
+namespace 恋选PSP文本处理器.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

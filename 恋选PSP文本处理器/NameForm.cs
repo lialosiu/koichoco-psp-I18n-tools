@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace 恋选PSP脚本处理器
+namespace 恋选PSP文本处理器
 {
     public partial class NameForm : Form
     {
@@ -20,6 +20,7 @@ namespace 恋选PSP脚本处理器
             this.gameText = gameText;
             foreach (GameText.Line thisLine in gameText.getAllAsList())
             {
+                if (thisLine.oriName == "") continue;
                 if (nameMap.ContainsKey(thisLine.oriName))
                 {
                     nameMap[thisLine.oriName].Add(thisLine.id);

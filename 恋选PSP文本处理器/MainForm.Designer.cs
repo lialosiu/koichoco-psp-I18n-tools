@@ -1,4 +1,4 @@
-﻿namespace 恋选PSP脚本处理器
+﻿namespace 恋选PSP文本处理器
 {
     partial class MainForm
     {
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.导入文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -57,6 +57,11 @@
             this.panel_ForChs = new System.Windows.Forms.Panel();
             this.textBox_ChsName = new System.Windows.Forms.TextBox();
             this.dataGridView = new System.Windows.Forms.DataGridView();
+            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.OriName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ChsName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.OriSentences = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ChsSentences = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel_Waiting = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.mainMenuStrip.SuspendLayout();
@@ -97,33 +102,33 @@
             // 导入文本ToolStripMenuItem
             // 
             this.导入文本ToolStripMenuItem.Name = "导入文本ToolStripMenuItem";
-            this.导入文本ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.导入文本ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.导入文本ToolStripMenuItem.Text = "导入文本";
             this.导入文本ToolStripMenuItem.Click += new System.EventHandler(this.导入文本ToolStripMenuItem_Click);
             // 
             // 导出文本ToolStripMenuItem
             // 
             this.导出文本ToolStripMenuItem.Name = "导出文本ToolStripMenuItem";
-            this.导出文本ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.导出文本ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.导出文本ToolStripMenuItem.Text = "导出文本";
             this.导出文本ToolStripMenuItem.Click += new System.EventHandler(this.导出文本ToolStripMenuItem_Click);
             // 
             // 保存ToolStripMenuItem
             // 
             this.保存ToolStripMenuItem.Name = "保存ToolStripMenuItem";
-            this.保存ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.保存ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.保存ToolStripMenuItem.Text = "保存";
             this.保存ToolStripMenuItem.Click += new System.EventHandler(this.保存ToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(119, 6);
             // 
             // 退出ToolStripMenuItem
             // 
             this.退出ToolStripMenuItem.Name = "退出ToolStripMenuItem";
-            this.退出ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.退出ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.退出ToolStripMenuItem.Text = "退出";
             this.退出ToolStripMenuItem.Click += new System.EventHandler(this.退出ToolStripMenuItem_Click);
             // 
@@ -316,11 +321,17 @@
             this.dataGridView.AllowUserToAddRows = false;
             this.dataGridView.AllowUserToDeleteRows = false;
             this.dataGridView.AllowUserToResizeRows = false;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.dataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.dataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             this.dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridView.BackgroundColor = System.Drawing.Color.White;
             this.dataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ID,
+            this.OriName,
+            this.ChsName,
+            this.OriSentences,
+            this.ChsSentences});
             this.dataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView.GridColor = System.Drawing.Color.Silver;
             this.dataGridView.Location = new System.Drawing.Point(0, 24);
@@ -332,8 +343,50 @@
             this.dataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView.Size = new System.Drawing.Size(784, 256);
             this.dataGridView.TabIndex = 7;
-            this.dataGridView.DataSourceChanged += new System.EventHandler(this.dataGridView_DataSourceChanged);
             this.dataGridView.CurrentCellChanged += new System.EventHandler(this.dataGridView_CurrentCellChanged);
+            // 
+            // ID
+            // 
+            this.ID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.ID.FillWeight = 20F;
+            this.ID.HeaderText = "ID";
+            this.ID.Name = "ID";
+            this.ID.ReadOnly = true;
+            this.ID.Width = 50;
+            // 
+            // OriName
+            // 
+            this.OriName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.OriName.FillWeight = 20F;
+            this.OriName.HeaderText = "原名";
+            this.OriName.Name = "OriName";
+            this.OriName.ReadOnly = true;
+            this.OriName.Width = 150;
+            // 
+            // ChsName
+            // 
+            this.ChsName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.ChsName.FillWeight = 20F;
+            this.ChsName.HeaderText = "译名";
+            this.ChsName.Name = "ChsName";
+            this.ChsName.ReadOnly = true;
+            this.ChsName.Width = 150;
+            // 
+            // OriSentences
+            // 
+            this.OriSentences.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.OriSentences.FillWeight = 20F;
+            this.OriSentences.HeaderText = "原文";
+            this.OriSentences.Name = "OriSentences";
+            this.OriSentences.ReadOnly = true;
+            // 
+            // ChsSentences
+            // 
+            this.ChsSentences.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.ChsSentences.FillWeight = 20F;
+            this.ChsSentences.HeaderText = "译文";
+            this.ChsSentences.Name = "ChsSentences";
+            this.ChsSentences.ReadOnly = true;
             // 
             // panel_Waiting
             // 
@@ -376,7 +429,7 @@
             this.MinimumSize = new System.Drawing.Size(800, 500);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "恋选PSP脚本处理器 Ver 0.48 Bata";
+            this.Text = "恋选PSP文本处理器 Ver 0.51 Bata";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.mainMenuStrip.ResumeLayout(false);
@@ -426,6 +479,11 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ToolStripMenuItem 姓名处理ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 导入PC版TXT文本ToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ID;
+        private System.Windows.Forms.DataGridViewTextBoxColumn OriName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ChsName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn OriSentences;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ChsSentences;
     }
 }
 

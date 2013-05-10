@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Timers;
 
 namespace 恋选PSP文本处理器
 {
@@ -16,6 +17,10 @@ namespace 恋选PSP文本处理器
         CodeTable oriCodeTable;
         GameText gameText;
         Boolean successLoad = false;
+        System.Timers.Timer autoSaveTimer;
+        Int32 textGCount = 0;
+        Int32 textYCount = 0;
+        Int32 textWCount = 0;
 
         public MainForm()
         {
@@ -51,7 +56,6 @@ namespace 恋选PSP文本处理器
                 Application.Exit();
                 return;
             }
-
             this.oriCodeTable = CodeTable.getOriCodeTable();
             this.gameText = new GameText();
 
@@ -63,8 +67,20 @@ namespace 恋选PSP文本处理器
 
             Reload_DataGridView();
 
+            //自动储存计时器
+            autoSaveTimer = new System.Timers.Timer(1000 * 60);
+            autoSaveTimer.Elapsed += new ElapsedEventHandler(autoSave);
+            autoSaveTimer.AutoReset = true;
+            autoSaveTimer.Enabled = true;
+
             startlogo.Close();
             successLoad = true;
+        }
+
+        private void autoSave(object source, System.Timers.ElapsedEventArgs e)
+        {
+            Toolkit.serializeGameTextToFile("AutoSaveData.dat", gameText);
+            mainToolStripStatusLabel.Text = "[" + DateTime.Now.TimeOfDay.ToString() + "] 自动保存";
         }
 
         private void Reload_DataGridView()
@@ -73,11 +89,14 @@ namespace 恋选PSP文本处理器
             panel_Waiting.Update();
 
             dataGridView.Rows.Clear();
+            textGCount = 0;
+            textYCount = 0;
+            textWCount = 0;
 
             List<GameText.Line> thisGameTextList;
             if (隐藏已翻译文本ToolStripMenuItem.Checked == true)
             {
-                thisGameTextList = this.gameText.getAllNot2AsList();
+                thisGameTextList = this.gameText.getAllNot0AsList();
             }
             else
             {
@@ -93,9 +112,9 @@ namespace 恋选PSP文本处理器
                 {
                     switch (gameText.getLinebyID(thisLine.id).status)
                     {
-                        case 0: thisDataGridViewRow.DefaultCellStyle.BackColor = Color.LightGreen; break;
-                        case 1: thisDataGridViewRow.DefaultCellStyle.BackColor = Color.Yellow; break;
-                        //case 2: thisRow.DefaultCellStyle.BackColor = Color.White; break;
+                        case 0: thisDataGridViewRow.DefaultCellStyle.BackColor = Color.LightGreen; textGCount++; break;
+                        case 1: thisDataGridViewRow.DefaultCellStyle.BackColor = Color.Yellow; textYCount++; break;
+                        case 2: textWCount++; break;
                         //default: thisRow.DefaultCellStyle.BackColor = Color.Black; break;
                     }
                 }
@@ -103,6 +122,7 @@ namespace 恋选PSP文本处理器
             }
             dataGridView.Select();
             panel_Waiting.Visible = false;
+            mainToolStripStatusLabel.Text = "已翻：" + textGCount + " | 超长：" + textYCount + " | 未翻：" + textWCount;
         }
 
         private void 初始化文本ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -477,25 +497,46 @@ namespace 恋选PSP文本处理器
 
         private void textBox_ChsText_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar == 13)
+            switch ((Int32)e.KeyChar)
             {
-                gameText.setChsSentencesbyID(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()), textBox_ChsText.Text);
-                dataGridView.CurrentRow.Cells[4].Value = gameText.getChsSentencesbyID(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()));
-                if (状态着色ToolStripMenuItem.Checked)
-                {
-                    switch (gameText.getLinebyID(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString())).status)
+                case 13:
                     {
-                        case 0: dataGridView.CurrentRow.DefaultCellStyle.BackColor = Color.LightGreen; break;
-                        case 1: dataGridView.CurrentRow.DefaultCellStyle.BackColor = Color.Yellow; break;
-                        //case 2: thisRow.DefaultCellStyle.BackColor = Color.White; break;
-                        //default: thisRow.DefaultCellStyle.BackColor = Color.Black; break;
+                        if (dataGridView.CurrentRow.DefaultCellStyle.BackColor == Color.LightGreen) textGCount--;
+                        else if (dataGridView.CurrentRow.DefaultCellStyle.BackColor == Color.Yellow) textYCount--;
+                        else textWCount--;
+                        gameText.setChsSentencesbyID(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()), textBox_ChsText.Text);
+                        dataGridView.CurrentRow.Cells[4].Value = gameText.getChsSentencesbyID(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()));
+                        if (状态着色ToolStripMenuItem.Checked)
+                        {
+                            switch (gameText.getLinebyID(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString())).status)
+                            {
+                                case 0: dataGridView.CurrentRow.DefaultCellStyle.BackColor = Color.LightGreen; textGCount++; break;
+                                case 1: dataGridView.CurrentRow.DefaultCellStyle.BackColor = Color.Yellow; textYCount++; break;
+                                case 2: textWCount++; break;
+                                //default: thisRow.DefaultCellStyle.BackColor = Color.Black; break;
+                            }
+                        }
+                        do
+                        {
+                            dataGridView.CurrentCell = dataGridView.Rows[dataGridView.CurrentRow.Index + 1].Cells[0];
+                        } while (跳过已翻译文本ToolStripMenuItem.Checked && dataGridView.CurrentCellAddress.Y < dataGridView.Rows.Count - 1 && gameText.getLinebyID(Int32.Parse(dataGridView.Rows[dataGridView.CurrentRow.Index].Cells[0].Value.ToString())).status == 0);
+                        mainToolStripStatusLabel.Text = "已翻：" + textGCount + " | 超长：" + textYCount + " | 未翻：" + textWCount;
+                        e.Handled = true;
                     }
-                }
-                do
-                {
-                    dataGridView.CurrentCell = dataGridView.Rows[dataGridView.CurrentRow.Index + 1].Cells[0];
-                } while (dataGridView.CurrentCellAddress.Y < dataGridView.Rows.Count - 1 && gameText.getLinebyID(Int32.Parse(dataGridView.Rows[dataGridView.CurrentRow.Index].Cells[0].Value.ToString())).status == 0);
-                e.Handled = true;
+                    break;
+
+                //Ctrl + a
+                case 1:
+                    {
+                        textBox_ChsText.SelectAll();
+                        e.Handled = true;
+                    }
+                    break;
+                default:
+                    {
+                        //mainToolStripStatusLabel.Text = ((int)(e.KeyChar)).ToString();
+                    }
+                    break;
             }
         }
 
@@ -506,6 +547,7 @@ namespace 恋选PSP文本处理器
             textBox_OriText.Text = dataGridView.CurrentRow.Cells[3].Value.ToString();
             textBox_ChsName.Text = dataGridView.CurrentRow.Cells[2].Value.ToString();
             textBox_ChsText.Text = dataGridView.CurrentRow.Cells[4].Value.ToString();
+            textBox_ChsText.SelectAll();
         }
 
         private void textBox_ChsText_KeyDown(object sender, KeyEventArgs e)
@@ -579,6 +621,18 @@ namespace 恋选PSP文本处理器
             if (successLoad && DialogResult.Yes == MessageBox.Show(null, "是否保存数据？", "退出", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2))
             {
                 保存ToolStripMenuItem_Click(sender, null);
+            }
+        }
+
+        private void 跳过已翻译文本ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (跳过已翻译文本ToolStripMenuItem.Checked == false)
+            {
+                跳过已翻译文本ToolStripMenuItem.Checked = true;
+            }
+            else
+            {
+                跳过已翻译文本ToolStripMenuItem.Checked = false;
             }
         }
 

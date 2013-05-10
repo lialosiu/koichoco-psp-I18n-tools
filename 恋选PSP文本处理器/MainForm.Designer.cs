@@ -38,6 +38,7 @@
             this.退出ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.选项ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.状态着色ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.跳过已翻译文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.隐藏已翻译文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.工具ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.生成Scbin与相应码表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -136,6 +137,7 @@
             // 
             this.选项ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.状态着色ToolStripMenuItem,
+            this.跳过已翻译文本ToolStripMenuItem,
             this.隐藏已翻译文本ToolStripMenuItem});
             this.选项ToolStripMenuItem.Name = "选项ToolStripMenuItem";
             this.选项ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
@@ -150,6 +152,15 @@
             this.状态着色ToolStripMenuItem.Text = "状态着色";
             this.状态着色ToolStripMenuItem.CheckedChanged += new System.EventHandler(this.状态着色ToolStripMenuItem_CheckedChanged);
             this.状态着色ToolStripMenuItem.Click += new System.EventHandler(this.状态着色ToolStripMenuItem_Click);
+            // 
+            // 跳过已翻译文本ToolStripMenuItem
+            // 
+            this.跳过已翻译文本ToolStripMenuItem.Checked = true;
+            this.跳过已翻译文本ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.跳过已翻译文本ToolStripMenuItem.Name = "跳过已翻译文本ToolStripMenuItem";
+            this.跳过已翻译文本ToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
+            this.跳过已翻译文本ToolStripMenuItem.Text = "跳过已翻译文本";
+            this.跳过已翻译文本ToolStripMenuItem.Click += new System.EventHandler(this.跳过已翻译文本ToolStripMenuItem_Click);
             // 
             // 隐藏已翻译文本ToolStripMenuItem
             // 
@@ -172,28 +183,28 @@
             // 生成Scbin与相应码表ToolStripMenuItem
             // 
             this.生成Scbin与相应码表ToolStripMenuItem.Name = "生成Scbin与相应码表ToolStripMenuItem";
-            this.生成Scbin与相应码表ToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.生成Scbin与相应码表ToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.生成Scbin与相应码表ToolStripMenuItem.Text = "生成 sc.bin 和 lt.bin";
             this.生成Scbin与相应码表ToolStripMenuItem.Click += new System.EventHandler(this.生成scbin和ltbinToolStripMenuItem_Click);
             // 
             // 导入PC版TXT文本ToolStripMenuItem
             // 
             this.导入PC版TXT文本ToolStripMenuItem.Name = "导入PC版TXT文本ToolStripMenuItem";
-            this.导入PC版TXT文本ToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.导入PC版TXT文本ToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.导入PC版TXT文本ToolStripMenuItem.Text = "导入PC版TXT文本";
             this.导入PC版TXT文本ToolStripMenuItem.Click += new System.EventHandler(this.导入PC版TXT文本ToolStripMenuItem_Click);
             // 
             // 姓名处理ToolStripMenuItem
             // 
             this.姓名处理ToolStripMenuItem.Name = "姓名处理ToolStripMenuItem";
-            this.姓名处理ToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.姓名处理ToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.姓名处理ToolStripMenuItem.Text = "姓名处理";
             this.姓名处理ToolStripMenuItem.Click += new System.EventHandler(this.姓名处理ToolStripMenuItem_Click);
             // 
             // 初始化文本ToolStripMenuItem
             // 
             this.初始化文本ToolStripMenuItem.Name = "初始化文本ToolStripMenuItem";
-            this.初始化文本ToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.初始化文本ToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.初始化文本ToolStripMenuItem.Text = "初始化文本";
             this.初始化文本ToolStripMenuItem.Click += new System.EventHandler(this.初始化文本ToolStripMenuItem_Click);
             // 
@@ -210,19 +221,19 @@
             // 说明ToolStripMenuItem
             // 
             this.说明ToolStripMenuItem.Name = "说明ToolStripMenuItem";
-            this.说明ToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
+            this.说明ToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.说明ToolStripMenuItem.Text = "说明";
             this.说明ToolStripMenuItem.Click += new System.EventHandler(this.说明ToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(135, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(129, 6);
             // 
             // lOSStudioToolStripMenuItem
             // 
             this.lOSStudioToolStripMenuItem.Name = "lOSStudioToolStripMenuItem";
-            this.lOSStudioToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
+            this.lOSStudioToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.lOSStudioToolStripMenuItem.Text = "LOS Studio";
             this.lOSStudioToolStripMenuItem.Click += new System.EventHandler(this.lOSStudioToolStripMenuItem_Click);
             // 
@@ -429,7 +440,7 @@
             this.MinimumSize = new System.Drawing.Size(800, 500);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "恋选PSP文本处理器 Ver 0.51 Bata";
+            this.Text = "恋选PSP文本处理器 Ver 0.57 Beta";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.mainMenuStrip.ResumeLayout(false);
@@ -484,6 +495,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ChsName;
         private System.Windows.Forms.DataGridViewTextBoxColumn OriSentences;
         private System.Windows.Forms.DataGridViewTextBoxColumn ChsSentences;
+        private System.Windows.Forms.ToolStripMenuItem 跳过已翻译文本ToolStripMenuItem;
     }
 }
 

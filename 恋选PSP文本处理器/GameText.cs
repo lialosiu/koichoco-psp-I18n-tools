@@ -320,6 +320,23 @@ namespace 恋选PSP文本处理器
             return gameTextList;
         }
 
+        /// <summary>
+        /// 输出所有文本，除了已翻译的
+        /// </summary>
+        /// <returns>所有除了已翻译的文本List</returns>
+        public List<Line> getAllNot0AsList()
+        {
+            List<Line> gameTextList = new List<Line>();
+
+            foreach (var item in this.line)
+            {
+                Line thisLine = item.Value;
+                if (thisLine.status == 0) continue;
+                gameTextList.Add(thisLine);
+            }
+            return gameTextList;
+        }
+
         //从TXT文件读入
         public Int32 readFromTXT(String fileName)
         {
@@ -382,11 +399,12 @@ namespace 恋选PSP文本处理器
             Int32 successCount = 0;
             StreamReader thisFile = new StreamReader(fileURL);
 
-            String[,] _StrType = new String[10, 2];
+            String[,] _StrType = new String[10, 5];
 
             //○46○裕樹「よいしょっと」
             _StrType[0, 0] = @"○\d+○(.*)「(.+)」";
             _StrType[0, 1] = @"●\d+●(.*)「(.+)」";
+            _StrType[0, 2] = @"●\d+●(.*)「(.+)";
 
             //○46○裕樹「よいしょっと
             _StrType[1, 0] = @"○\d+○(.*)「(.+)";
@@ -395,10 +413,14 @@ namespace 恋选PSP文本处理器
             //○46○裕樹/ょっと」
             _StrType[2, 0] = @"○\d+○(.*)\/(.+)」";
             _StrType[2, 1] = @"●\d+●(.*)\/(.+)」";
+            _StrType[2, 2] = @"●\d+●(.*)\/(.+)";
+            _StrType[2, 3] = @"●\d+●(.*)(.+)」";
+            _StrType[2, 4] = @"●\d+●(.*)(.+)";
 
             //○xx○/ょっと
             _StrType[3, 0] = @"○\d+○\/(.+)";
-            _StrType[3, 1] = @"●\d+●\/?(.+)";
+            _StrType[3, 1] = @"●\d+●\/(.+)";
+            _StrType[3, 2] = @"●\d+●(.+)";
 
             //○47○家の自転車を引っ張り出して、またがった。
             _StrType[4, 0] = @"○\d+○(.+)";
@@ -435,34 +457,44 @@ namespace 恋选PSP文本处理器
                         _OriSentences = thisLineString_Match.Groups[1].ToString();
                     }
 
+                    if (_OriSentences.Split('…').Length == _OriSentences.Length + 1) continue;
+
                     thisLineString = thisFile.ReadLine();
-                    thisLineString_Match = Regex.Match(thisLineString, _StrType[_Type, 1]);
-                    if (thisLineString_Match.Success)
+
+                    int thisChsType = 1;
+                    while (thisChsType < 5 && _StrType[_Type, thisChsType] != "" && _StrType[_Type, thisChsType] != null)
                     {
-                        String _ChsName;
-                        String _ChsSentences;
+                        thisLineString_Match = Regex.Match(thisLineString, _StrType[_Type, thisChsType]);
 
-                        if (_Type < 3)
+                        if (thisLineString_Match.Success)
                         {
-                            _ChsName = thisLineString_Match.Groups[1].ToString();
-                            _ChsSentences = thisLineString_Match.Groups[2].ToString();
-                        }
-                        else
-                        {
-                            _ChsName = "";
-                            _ChsSentences = thisLineString_Match.Groups[1].ToString();
-                        }
+                            String _ChsName;
+                            String _ChsSentences;
 
-                        Int32 thisTimeSuccessCount = 0;
-                        if (matchOriName == true)
-                        {
-                            thisTimeSuccessCount = this.setChsbyOriNameSentences(_OriName, _OriSentences, _ChsName, _ChsSentences, _LogFile1);
+                            if (_Type < 3)
+                            {
+                                _ChsName = thisLineString_Match.Groups[1].ToString();
+                                _ChsSentences = thisLineString_Match.Groups[2].ToString();
+                            }
+                            else
+                            {
+                                _ChsName = "";
+                                _ChsSentences = thisLineString_Match.Groups[1].ToString();
+                            }
+
+                            Int32 thisTimeSuccessCount = 0;
+                            if (matchOriName == true)
+                            {
+                                thisTimeSuccessCount = this.setChsbyOriNameSentences(_OriName, _OriSentences, _ChsName, _ChsSentences, _LogFile1);
+                            }
+                            else
+                            {
+                                thisTimeSuccessCount = this.setChsbyOriSentences(_OriSentences, _ChsSentences, _LogFile2);
+                            }
+                            successCount += thisTimeSuccessCount;
+                            break;
                         }
-                        else
-                        {
-                            thisTimeSuccessCount = this.setChsbyOriSentences(_OriSentences, _ChsSentences, _LogFile2);
-                        }
-                        successCount += thisTimeSuccessCount;
+                        thisChsType++;
                     }
                 }
             }
@@ -596,7 +628,7 @@ namespace 恋选PSP文本处理器
 
                     //换算文本指针所指地址
                     offsetText = 0x30000 + Convert.ToInt32(_Bytes[3]) * 0x100 * 0x100 * 0x100 + Convert.ToInt32(_Bytes[2]) * 0x100 * 0x100 + Convert.ToInt32(_Bytes[1]) * 0x100 + Convert.ToInt32(_Bytes[0]);
-                    
+
                     if (offsetText == 0x30000)
                     {
                         startAChoose = true;

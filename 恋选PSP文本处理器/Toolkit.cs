@@ -87,8 +87,6 @@ namespace 恋选PSP文本处理器
             thisFileStream.Write(thisLineByte, 0, 16);
         }
 
-
-
         public static Boolean serializeGameTextToFile(String FileName, GameText gameText)
         {
             Stream stream = new FileStream(FileName, FileMode.Create, FileAccess.Write, FileShare.None);

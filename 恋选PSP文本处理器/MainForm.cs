@@ -79,8 +79,7 @@ namespace 恋选PSP文本处理器
 
         private void autoSave(object source, System.Timers.ElapsedEventArgs e)
         {
-            Toolkit.serializeGameTextToFile("AutoSaveData.dat", gameText);
-            mainToolStripStatusLabel.Text = "[" + DateTime.Now.TimeOfDay.ToString() + "] 自动保存";
+            this.saveFile("AutoSaveData.dat", "[" + DateTime.Now.TimeOfDay.ToString() + "] 自动保存");
         }
 
         private void Reload_DataGridView()
@@ -175,8 +174,7 @@ namespace 恋选PSP文本处理器
 
         private void 保存ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Toolkit.serializeGameTextToFile("Data.dat", gameText);
-            mainToolStripStatusLabel.Text = "已保存";
+            this.saveFile("Data.dat", "已保存");
         }
 
         private void lOSStudioToolStripMenuItem_Click(object sender, EventArgs e)
@@ -532,6 +530,14 @@ namespace 恋选PSP文本处理器
                         e.Handled = true;
                     }
                     break;
+
+                //Ctrl + s
+                case 19:
+                    {
+                        saveFile("Data.dat", "快速保存");
+                        e.Handled = true;
+                    }
+                    break;
                 default:
                     {
                         //mainToolStripStatusLabel.Text = ((int)(e.KeyChar)).ToString();
@@ -634,6 +640,18 @@ namespace 恋选PSP文本处理器
             {
                 跳过已翻译文本ToolStripMenuItem.Checked = false;
             }
+        }
+
+
+        /// <summary>
+        /// 序列化保存GameText
+        /// </summary>
+        /// <param name="fileName">文件名</param>
+        /// <param name="tips">提示</param>
+        private void saveFile(String fileName, String tips)
+        {
+            Toolkit.serializeGameTextToFile(fileName, this.gameText);
+            mainToolStripStatusLabel.Text = tips;
         }
 
     }

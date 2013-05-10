@@ -531,13 +531,6 @@ namespace 恋选PSP文本处理器
                     }
                     break;
 
-                //Ctrl + s
-                case 19:
-                    {
-                        saveFile("Data.dat", "快速保存");
-                        e.Handled = true;
-                    }
-                    break;
                 default:
                     {
                         //mainToolStripStatusLabel.Text = ((int)(e.KeyChar)).ToString();

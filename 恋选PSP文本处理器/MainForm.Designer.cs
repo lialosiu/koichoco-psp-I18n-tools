@@ -103,33 +103,34 @@
             // 导入文本ToolStripMenuItem
             // 
             this.导入文本ToolStripMenuItem.Name = "导入文本ToolStripMenuItem";
-            this.导入文本ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.导入文本ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.导入文本ToolStripMenuItem.Text = "导入文本";
             this.导入文本ToolStripMenuItem.Click += new System.EventHandler(this.导入文本ToolStripMenuItem_Click);
             // 
             // 导出文本ToolStripMenuItem
             // 
             this.导出文本ToolStripMenuItem.Name = "导出文本ToolStripMenuItem";
-            this.导出文本ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.导出文本ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.导出文本ToolStripMenuItem.Text = "导出文本";
             this.导出文本ToolStripMenuItem.Click += new System.EventHandler(this.导出文本ToolStripMenuItem_Click);
             // 
             // 保存ToolStripMenuItem
             // 
             this.保存ToolStripMenuItem.Name = "保存ToolStripMenuItem";
-            this.保存ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.保存ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.保存ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.保存ToolStripMenuItem.Text = "保存";
             this.保存ToolStripMenuItem.Click += new System.EventHandler(this.保存ToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(119, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // 退出ToolStripMenuItem
             // 
             this.退出ToolStripMenuItem.Name = "退出ToolStripMenuItem";
-            this.退出ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.退出ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.退出ToolStripMenuItem.Text = "退出";
             this.退出ToolStripMenuItem.Click += new System.EventHandler(this.退出ToolStripMenuItem_Click);
             // 

@@ -72,7 +72,7 @@ namespace 恋选PSP文本处理器
             autoSaveTimer.Elapsed += new ElapsedEventHandler(autoSave);
             autoSaveTimer.AutoReset = true;
             autoSaveTimer.Enabled = true;
-
+            
             startlogo.Close();
             successLoad = true;
         }
@@ -523,14 +523,6 @@ namespace 恋选PSP文本处理器
                     }
                     break;
 
-                //Ctrl + a
-                case 1:
-                    {
-                        textBox_ChsText.SelectAll();
-                        e.Handled = true;
-                    }
-                    break;
-
                 default:
                     {
                         //mainToolStripStatusLabel.Text = ((int)(e.KeyChar)).ToString();
@@ -645,6 +637,12 @@ namespace 恋选PSP文本处理器
         {
             Toolkit.serializeGameTextToFile(fileName, this.gameText);
             mainToolStripStatusLabel.Text = tips;
+        }
+
+        private void 全选ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            textBox_ChsText.Focus();
+            textBox_ChsText.SelectAll();
         }
 
     }

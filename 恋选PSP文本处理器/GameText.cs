@@ -61,26 +61,30 @@ namespace 恋选PSP文本处理器
             }
         }
 
-        Dictionary<Int32, Line> line = new Dictionary<Int32, Line>();
-        Dictionary<String, List<Int32>> oriNameSentences2ids = new Dictionary<String, List<Int32>>();
+        Dictionary<Int32, Line> theTexts = new Dictionary<Int32, Line>();
         Dictionary<String, List<Int32>> oriSentences2ids = new Dictionary<String, List<Int32>>();
 
         public void addLine(Int32 id, String oriName, String chsName, String oriSentences, String chsSentences)
         {
             Line thisLine = new Line(id, oriName, chsName, oriSentences, chsSentences);
-            line.Add(id, thisLine);
-            if (oriNameSentences2ids.ContainsKey('[' + oriName + ']' + oriSentences))
+            theTexts.Add(id, thisLine);
+
+            /*
+            //添加字典 原名->ID
+            if (oriName2ids.ContainsKey(oriName))
             {
-                List<Int32> IDList = oriNameSentences2ids['[' + oriName + ']' + oriSentences];
+                List<Int32> IDList = oriName2ids[oriName];
                 IDList.Add(id);
             }
             else
             {
                 List<Int32> IDList = new List<Int32>();
                 IDList.Add(id);
-                oriNameSentences2ids.Add('[' + oriName + ']' + oriSentences, IDList);
+                oriName2ids.Add(oriName, IDList);
             }
+             * */
 
+            //添加字典 原文->ID
             if (oriSentences2ids.ContainsKey(oriSentences))
             {
                 List<Int32> IDList = oriSentences2ids[oriSentences];
@@ -97,7 +101,7 @@ namespace 恋选PSP文本处理器
         //用ID搜索Line
         public Line getLinebyID(Int32 id)
         {
-            Line thisLine = line[id];
+            Line thisLine = theTexts[id];
             return thisLine;
         }
 
@@ -121,7 +125,7 @@ namespace 恋选PSP文本处理器
         /// </summary>
         public void setAllLineChangeFlagToFalse()
         {
-            foreach (var thisLine in this.line)
+            foreach (var thisLine in this.theTexts)
             {
                 thisLine.Value.changedFlag = false;
             }
@@ -138,14 +142,12 @@ namespace 恋选PSP文本处理器
         public Int32 setChsbyOriNameSentences(String oriName, String oriSentences, String chsName, String chsSentences, StreamWriter logFile)
         {
             Int32 successCount = 0;
-            List<Int32> _IDs;
-            if (oriNameSentences2ids.ContainsKey('[' + oriName + ']' + oriSentences))
+            if (oriSentences2ids.ContainsKey(oriSentences))
             {
-                _IDs = oriNameSentences2ids['[' + oriName + ']' + oriSentences];
-                foreach (Int32 thisID in _IDs)
+                foreach (Int32 thisID in oriSentences2ids[oriSentences])
                 {
                     Line thisLine = getLinebyID(thisID);
-                    if (thisLine.changedFlag == false)
+                    if (thisLine.changedFlag == false && thisLine.oriName == oriName)
                     {
                         thisLine.chsName = chsName;
                         thisLine.chsSentences = chsSentences;
@@ -172,12 +174,9 @@ namespace 恋选PSP文本处理器
         public Int32 setChsbyOriSentences(String oriSentences, String chsSentences, StreamWriter logFile)
         {
             Int32 successCount = 0;
-            List<Int32> _IDs;
-
             if (oriSentences2ids.ContainsKey(oriSentences))
             {
-                _IDs = oriSentences2ids[oriSentences];
-                foreach (Int32 thisID in _IDs)
+                foreach (Int32 thisID in oriSentences2ids[oriSentences])
                 {
                     Line thisLine = getLinebyID(thisID);
                     if (thisLine.changedFlag == false)
@@ -245,7 +244,7 @@ namespace 恋选PSP文本处理器
         //获取行数
         public Int32 getLineCount()
         {
-            return line.Count;
+            return theTexts.Count;
         }
 
         //输出所有为DataTable格式
@@ -259,7 +258,7 @@ namespace 恋选PSP文本处理器
             gameTextDataTable.Columns.Add("原文");
             gameTextDataTable.Columns.Add("译文");
 
-            foreach (var item in this.line)
+            foreach (var item in this.theTexts)
             {
                 Line thisLine = item.Value;
                 gameTextDataTable.Rows.Add(thisLine, thisLine.oriName, thisLine.chsName, thisLine.oriSentences, thisLine.chsSentences);
@@ -278,7 +277,7 @@ namespace 恋选PSP文本处理器
             gameTextDataTable.Columns.Add("原文");
             gameTextDataTable.Columns.Add("译文");
 
-            foreach (var item in this.line)
+            foreach (var item in this.theTexts)
             {
                 Line thisLine = item.Value;
                 if (thisLine.status != 0)
@@ -295,7 +294,7 @@ namespace 恋选PSP文本处理器
         {
             List<Line> gameTextList = new List<Line>();
 
-            foreach (var item in this.line)
+            foreach (var item in this.theTexts)
             {
                 Line thisLine = item.Value;
                 gameTextList.Add(thisLine);
@@ -311,7 +310,7 @@ namespace 恋选PSP文本处理器
         {
             List<Line> gameTextList = new List<Line>();
 
-            foreach (var item in this.line)
+            foreach (var item in this.theTexts)
             {
                 Line thisLine = item.Value;
                 if (thisLine.status == 2) continue;
@@ -328,7 +327,7 @@ namespace 恋选PSP文本处理器
         {
             List<Line> gameTextList = new List<Line>();
 
-            foreach (var item in this.line)
+            foreach (var item in this.theTexts)
             {
                 Line thisLine = item.Value;
                 if (thisLine.status == 0) continue;

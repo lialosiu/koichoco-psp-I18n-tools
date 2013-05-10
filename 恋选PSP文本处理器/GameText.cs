@@ -13,26 +13,33 @@ namespace 恋选PSP文本处理器
 {
     [Serializable]
     public class GameText
-    { 
+    {
         [Serializable]
         public class Line
         {
+            //唯一ID
             readonly public Int32 id;
+            //原名
             readonly public String oriName;
+            //译名
             private String _chsName;
             public String chsName
             {
                 get { return _chsName; }
                 set { _chsName = Toolkit.ToSBC(value); }
             }
+            //原文
             readonly public String oriSentences;
+            //译文
             private String _chsSentences;
             public String chsSentences
             {
                 get { return _chsSentences; }
                 set { _chsSentences = Toolkit.ToSBC(value); checkStatus(); }
             }
+            //状态
             public Int32 status;
+            //修改标记
             public Boolean changedFlag;
 
             public Line(Int32 id, String oriName, String chsName, String oriSentences, String chsSentences)
@@ -63,13 +70,13 @@ namespace 恋选PSP文本处理器
 
         Dictionary<Int32, Line> theTexts = new Dictionary<Int32, Line>();
         Dictionary<String, List<Int32>> oriSentences2ids = new Dictionary<String, List<Int32>>();
+        Dictionary<String, List<Int32>> oriName2ids = new Dictionary<String, List<Int32>>();
 
         public void addLine(Int32 id, String oriName, String chsName, String oriSentences, String chsSentences)
         {
             Line thisLine = new Line(id, oriName, chsName, oriSentences, chsSentences);
             theTexts.Add(id, thisLine);
 
-            /*
             //添加字典 原名->ID
             if (oriName2ids.ContainsKey(oriName))
             {
@@ -82,7 +89,6 @@ namespace 恋选PSP文本处理器
                 IDList.Add(id);
                 oriName2ids.Add(oriName, IDList);
             }
-             * */
 
             //添加字典 原文->ID
             if (oriSentences2ids.ContainsKey(oriSentences))
@@ -98,27 +104,16 @@ namespace 恋选PSP文本处理器
             }
         }
 
-        //用ID搜索Line
+        /// <summary>
+        /// 通过ID获取Line
+        /// </summary>
+        /// <param name="id">ID</param>
+        /// <returns>Line</returns>
         public Line getLinebyID(Int32 id)
         {
             Line thisLine = theTexts[id];
             return thisLine;
         }
-
-        /*
-        //用原名和原文搜索匹配的第一个Line
-        public Line getLinebyOriNameSentences(String oriName, String oriSentences)
-        {
-            try
-            {
-                return getLinebyID(oriNameSentences2id['[' + oriName + ']' + oriSentences]);
-            }
-            catch (KeyNotFoundException)
-            {
-                return null;
-            }
-        }
-         * */
 
         /// <summary>
         /// 将所有的Line的changeFlag设为false
@@ -245,45 +240,6 @@ namespace 恋选PSP文本处理器
         public Int32 getLineCount()
         {
             return theTexts.Count;
-        }
-
-        //输出所有为DataTable格式
-        public DataTable getAllAsDataTable()
-        {
-            DataTable gameTextDataTable = new DataTable();
-
-            gameTextDataTable.Columns.Add("ID");
-            gameTextDataTable.Columns.Add("原名");
-            gameTextDataTable.Columns.Add("翻名");
-            gameTextDataTable.Columns.Add("原文");
-            gameTextDataTable.Columns.Add("译文");
-
-            foreach (var item in this.theTexts)
-            {
-                Line thisLine = item.Value;
-                gameTextDataTable.Rows.Add(thisLine, thisLine.oriName, thisLine.chsName, thisLine.oriSentences, thisLine.chsSentences);
-            }
-            return gameTextDataTable;
-        }
-
-        //输出状态非0的文本为DataTable格式
-        public DataTable getStatusNotZeroAsDataTable()
-        {
-            DataTable gameTextDataTable = new DataTable();
-
-            gameTextDataTable.Columns.Add("ID");
-            gameTextDataTable.Columns.Add("原名");
-            gameTextDataTable.Columns.Add("翻名");
-            gameTextDataTable.Columns.Add("原文");
-            gameTextDataTable.Columns.Add("译文");
-
-            foreach (var item in this.theTexts)
-            {
-                Line thisLine = item.Value;
-                if (thisLine.status != 0)
-                    gameTextDataTable.Rows.Add(thisLine, thisLine.oriName, thisLine.chsName, thisLine.oriSentences, thisLine.chsSentences);
-            }
-            return gameTextDataTable;
         }
 
         /// <summary>
@@ -514,7 +470,7 @@ namespace 恋选PSP文本处理器
             {
                 foreach (Char thisChar in thisLine.chsName + thisLine.chsSentences)
                 {
-                    if (!usedChar.Exists(delegate(Char c) { return thisChar == c; }) && thisChar >= '一' && thisChar <= '龙')
+                    if (!usedChar.Exists(delegate(Char c) { return thisChar == c; }))// && thisChar >= '一' && thisChar <= '龙')
                     {
                         usedChar.Add(thisChar);
                     }
@@ -529,7 +485,7 @@ namespace 恋选PSP文本处理器
         public static GameText InitGameTextFactory()
         {
             GameText text = new GameText();
-            CodeTable oriCodeTable = CodeTable.getOriCodeTable();
+            CodeTable oriCodeTable = CodeTable.OriCodeTableFactory();
 
             FileStream thisFileStream = File.Open(@"sc.bin", FileMode.Open, FileAccess.Read);
             Int64 offsetTextPoint = 0x90;

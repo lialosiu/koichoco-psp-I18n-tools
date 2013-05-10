@@ -39,8 +39,25 @@ namespace 恋选PSP文本处理器
             return new Byte[] { (Byte)(thisCode % 0x100), (Byte)(thisCode / 0x100) };
         }
 
-        //获取原始码表
-        public static CodeTable getOriCodeTable()
+        /// <summary>
+        /// 获取码表中所有字符
+        /// </summary>
+        /// <returns>字符列表</returns>
+        public List<Char> getAllCharAsList()
+        {
+            List<Char> theList = new List<Char>();
+            for (Int32 code = 0; code < this.code2character.Count; code++)
+            {
+                theList.Add(this.code2character[code]);
+            }
+            return theList;
+        }
+
+        /// <summary>
+        /// 原始码表工厂
+        /// </summary>
+        /// <returns>原始码表</returns>
+        public static CodeTable OriCodeTableFactory()
         {
             CodeTable thisOriCodeTable = new CodeTable();
             XDocument doc = XDocument.Load("OriCodeTable.xml");
@@ -55,6 +72,24 @@ namespace 恋选PSP文本处理器
             foreach (var att in ele)
                 thisOriCodeTable.setCharacter(Int32.Parse(att.code2 + att.code1, System.Globalization.NumberStyles.AllowHexSpecifier), Convert.ToChar(att.word));
             return thisOriCodeTable;
+        }
+
+        /// <summary>
+        /// 码表工厂
+        /// </summary>
+        /// <param name="usedChsCharList">使用的字符列表</param>
+        /// <returns>码表</returns>
+        public static CodeTable CodeTableFactory(List<Char> usedChsCharList)
+        {
+            usedChsCharList.Insert(0, '　');
+            usedChsCharList.Insert(1, '■');
+            CodeTable theCodeTable = new CodeTable();
+            for (Int32 i = 0; i < usedChsCharList.Count; i++)
+            {
+                Char thisChar = usedChsCharList[i];
+                theCodeTable.setCharacter(i, thisChar);
+            }
+            return theCodeTable;
         }
     }
 }

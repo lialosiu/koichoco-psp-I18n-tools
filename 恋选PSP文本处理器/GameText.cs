@@ -13,7 +13,7 @@ namespace 恋选PSP文本处理器
 {
     [Serializable]
     public class GameText
-    {
+    { 
         [Serializable]
         public class Line
         {

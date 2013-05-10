@@ -87,14 +87,33 @@ namespace 恋选PSP文本处理器
             thisFileStream.Write(thisLineByte, 0, 16);
         }
 
-        public static Boolean serializeGameTextToFile(String FileName, GameText gameText)
+        /// <summary>
+        /// 序列化GameText，并储存为文件
+        /// </summary>
+        /// <param name="fileName">文件名</param>
+        /// <param name="gameText">GameText</param>
+        /// <returns>是否成功</returns>
+        public static Boolean serializeGameTextToFile(String fileName, GameText gameText)
         {
-            Stream stream = new FileStream(FileName, FileMode.Create, FileAccess.Write, FileShare.None);
-            new BinaryFormatter().Serialize(stream, gameText);
-            stream.Close();
-            return true;
+            try
+            {
+                Stream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
+                new BinaryFormatter().Serialize(stream, gameText);
+                stream.Close();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
+        /// <summary>
+        /// 从文件反序列化出GameText
+        /// </summary>
+        /// <param name="fileName">文件名</param>
+        /// <param name="gameText">GameText</param>
+        /// <returns>是否成功</returns>
         public static Boolean deserializeTextListFromFile(String FileName, ref GameText gameText)
         {
             try
@@ -102,12 +121,12 @@ namespace 恋选PSP文本处理器
                 Stream stream = new FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
                 gameText = (GameText)new BinaryFormatter().Deserialize(stream);
                 stream.Close();
+                return true;
             }
-            catch (FileNotFoundException)
+            catch
             {
                 return false;
             }
-            return true;
         }
 
     }

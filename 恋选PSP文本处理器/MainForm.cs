@@ -258,30 +258,10 @@ namespace 恋选PSP文本处理器
             {
                 case 13:
                     {
-                        if (dataGridView.CurrentRow.DefaultCellStyle.BackColor == Color.LightGreen) textGCount--;
-                        else if (dataGridView.CurrentRow.DefaultCellStyle.BackColor == Color.Yellow) textYCount--;
-                        else textWCount--;
-                        gameText.setChsSentencesbyID(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()), textBox_ChsText.Text);
-                        dataGridView.CurrentRow.Cells[4].Value = gameText.getChsSentencesbyID(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()));
-                        if (状态着色ToolStripMenuItem.Checked)
-                        {
-                            switch (gameText.getLinebyID(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString())).status)
-                            {
-                                case 0: dataGridView.CurrentRow.DefaultCellStyle.BackColor = Color.LightGreen; textGCount++; break;
-                                case 1: dataGridView.CurrentRow.DefaultCellStyle.BackColor = Color.Yellow; textYCount++; break;
-                                case 2: textWCount++; break;
-                                //default: thisRow.DefaultCellStyle.BackColor = Color.Black; break;
-                            }
-                        }
-                        do
-                        {
-                            dataGridView.CurrentCell = dataGridView.Rows[dataGridView.CurrentRow.Index + 1].Cells[0];
-                        } while (跳过已翻译文本ToolStripMenuItem.Checked && dataGridView.CurrentCellAddress.Y < dataGridView.Rows.Count - 1 && gameText.getLinebyID(Int32.Parse(dataGridView.Rows[dataGridView.CurrentRow.Index].Cells[0].Value.ToString())).status == 0);
-                        toolStripStatusLabel1.Text = "已翻：" + textGCount + " | 超长：" + textYCount + " | 未翻：" + textWCount;
+                        ChsTextBoxSubmit();
                         e.Handled = true;
                     }
                     break;
-
                 default:
                     {
                         //mainToolStripStatusLabel.Text = ((int)(e.KeyChar)).ToString();
@@ -376,16 +356,8 @@ namespace 恋选PSP文本处理器
 
         private void 跳过已翻译文本ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (跳过已翻译文本ToolStripMenuItem.Checked == false)
-            {
-                跳过已翻译文本ToolStripMenuItem.Checked = true;
-            }
-            else
-            {
-                跳过已翻译文本ToolStripMenuItem.Checked = false;
-            }
+            跳过已翻译文本ToolStripMenuItem.Checked = !跳过已翻译文本ToolStripMenuItem.Checked;
         }
-
 
         /// <summary>
         /// 序列化保存GameText
@@ -400,18 +372,27 @@ namespace 恋选PSP文本处理器
 
         private void 全选ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            textBox_ChsText.Focus();
             textBox_ChsText.SelectAll();
+            textBox_ChsText.Focus();
         }
 
-        private void InfoTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        private void 查找ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SearchForm searchForm = new SearchForm();
+            searchForm.SearchText += new SearchTextHandle(SearchTextAtDataGridView);
+            searchForm.ReplaceText += new ReplaceTextHandle(ReplaceTextAtDataGridView);
+            searchForm.Show();
+        }
+
+        private void QuickSearchTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             switch ((Int32)e.KeyChar)
             {
                 case 13:
                     {
-
+                        SearchTextAtDataGridView(1, true, QuickSearchTextBox.Text);
                     }
+                    e.Handled = true;
                     break;
 
                 default:
@@ -420,6 +401,61 @@ namespace 恋选PSP文本处理器
                     }
                     break;
             }
+        }
+
+        private Boolean SearchTextAtDataGridView(Int32 step, Boolean searchType, String searchText)
+        {
+            Int32 rowIndex = dataGridView.CurrentRow.Index + step;
+            while (true)
+            {
+                if (rowIndex >= dataGridView.RowCount) break;
+                if (rowIndex <= 0) break;
+                Int32 indexInText = dataGridView.Rows[rowIndex].Cells[searchType ? 4 : 3].Value.ToString().IndexOf(searchText);
+                if (indexInText != -1)
+                {
+                    dataGridView.CurrentCell = dataGridView.Rows[rowIndex].Cells[0];
+                    (searchType ? textBox_ChsText : textBox_OriText).Select(indexInText, searchText.Length);
+                    (searchType ? textBox_ChsText : textBox_OriText).Focus();
+                    return true;
+                }
+                rowIndex += step;
+            }
+            return false;
+        }
+
+        private void ReplaceTextAtDataGridView(String searchText, String replaceText)
+        {
+            if (textBox_ChsText.SelectedText == searchText)
+            {
+                textBox_ChsText.SelectedText = replaceText;
+                textBox_ChsText.Select(textBox_ChsText.Text.IndexOf(replaceText), replaceText.Length);
+                ChsTextBoxSubmit();
+            }
+            SearchTextAtDataGridView(1, true, searchText);
+        }
+
+        private void ChsTextBoxSubmit()
+        {
+            if (dataGridView.CurrentRow.DefaultCellStyle.BackColor == Color.LightGreen) textGCount--;
+            else if (dataGridView.CurrentRow.DefaultCellStyle.BackColor == Color.Yellow) textYCount--;
+            else textWCount--;
+            gameText.setChsSentencesbyID(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()), textBox_ChsText.Text);
+            dataGridView.CurrentRow.Cells[4].Value = gameText.getChsSentencesbyID(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString()));
+            if (状态着色ToolStripMenuItem.Checked)
+            {
+                switch (gameText.getLinebyID(Int32.Parse(dataGridView.CurrentRow.Cells[0].Value.ToString())).status)
+                {
+                    case 0: dataGridView.CurrentRow.DefaultCellStyle.BackColor = Color.LightGreen; textGCount++; break;
+                    case 1: dataGridView.CurrentRow.DefaultCellStyle.BackColor = Color.Yellow; textYCount++; break;
+                    case 2: textWCount++; break;
+                    //default: thisRow.DefaultCellStyle.BackColor = Color.Black; break;
+                }
+            }
+            do
+            {
+                dataGridView.CurrentCell = dataGridView.Rows[dataGridView.CurrentRow.Index + 1].Cells[0];
+            } while (跳过已翻译文本ToolStripMenuItem.Checked && dataGridView.CurrentCellAddress.Y < dataGridView.Rows.Count - 1 && gameText.getLinebyID(Int32.Parse(dataGridView.Rows[dataGridView.CurrentRow.Index].Cells[0].Value.ToString())).status == 0);
+            toolStripStatusLabel1.Text = "已翻：" + textGCount + " | 超长：" + textYCount + " | 未翻：" + textWCount;
         }
 
     }

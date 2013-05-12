@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.导入文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -40,6 +40,7 @@
             this.撤销ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.重做ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.全选ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.查找ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.选项ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.状态着色ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.跳过已翻译文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,6 +54,7 @@
             this.说明ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.lOSStudioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.QuickSearchTextBox = new System.Windows.Forms.ToolStripTextBox();
             this.mainStatusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.textBox_OriText = new System.Windows.Forms.TextBox();
@@ -69,8 +71,7 @@
             this.ChsSentences = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel_Waiting = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
-            this.QuickSearchTextBox = new System.Windows.Forms.ToolStripTextBox();
-            this.查找ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.panel_ForOri.SuspendLayout();
@@ -155,12 +156,14 @@
             // 
             // 撤销ToolStripMenuItem
             // 
+            this.撤销ToolStripMenuItem.Enabled = false;
             this.撤销ToolStripMenuItem.Name = "撤销ToolStripMenuItem";
             this.撤销ToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.撤销ToolStripMenuItem.Text = "撤销";
             // 
             // 重做ToolStripMenuItem
             // 
+            this.重做ToolStripMenuItem.Enabled = false;
             this.重做ToolStripMenuItem.Name = "重做ToolStripMenuItem";
             this.重做ToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.重做ToolStripMenuItem.Text = "重做";
@@ -172,6 +175,14 @@
             this.全选ToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.全选ToolStripMenuItem.Text = "全选";
             this.全选ToolStripMenuItem.Click += new System.EventHandler(this.全选ToolStripMenuItem_Click);
+            // 
+            // 查找ToolStripMenuItem
+            // 
+            this.查找ToolStripMenuItem.Name = "查找ToolStripMenuItem";
+            this.查找ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
+            this.查找ToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.查找ToolStripMenuItem.Text = "查找";
+            this.查找ToolStripMenuItem.Click += new System.EventHandler(this.查找ToolStripMenuItem_Click);
             // 
             // 选项ToolStripMenuItem
             // 
@@ -213,6 +224,7 @@
             // 
             this.工具ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.生成Scbin与相应码表ToolStripMenuItem,
+            this.toolStripMenuItem2,
             this.导入PC版TXT文本ToolStripMenuItem,
             this.姓名处理ToolStripMenuItem,
             this.初始化文本ToolStripMenuItem});
@@ -276,6 +288,13 @@
             this.lOSStudioToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.lOSStudioToolStripMenuItem.Text = "LOS Studio";
             this.lOSStudioToolStripMenuItem.Click += new System.EventHandler(this.lOSStudioToolStripMenuItem_Click);
+            // 
+            // QuickSearchTextBox
+            // 
+            this.QuickSearchTextBox.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.QuickSearchTextBox.Name = "QuickSearchTextBox";
+            this.QuickSearchTextBox.Size = new System.Drawing.Size(100, 23);
+            this.QuickSearchTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.QuickSearchTextBox_KeyPress);
             // 
             // mainStatusStrip
             // 
@@ -373,8 +392,8 @@
             this.dataGridView.AllowUserToAddRows = false;
             this.dataGridView.AllowUserToDeleteRows = false;
             this.dataGridView.AllowUserToResizeRows = false;
-            dataGridViewCellStyle3.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.dataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.dataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             this.dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridView.BackgroundColor = System.Drawing.Color.White;
             this.dataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -466,20 +485,12 @@
             this.label1.Text = "处理中，请稍候 m(_ _)m";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // InfoTextBox
+            // toolStripMenuItem2
             // 
-            this.QuickSearchTextBox.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.QuickSearchTextBox.Name = "InfoTextBox";
-            this.QuickSearchTextBox.Size = new System.Drawing.Size(100, 23);
-            this.QuickSearchTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.QuickSearchTextBox_KeyPress);
-            // 
-            // 查找ToolStripMenuItem
-            // 
-            this.查找ToolStripMenuItem.Name = "查找ToolStripMenuItem";
-            this.查找ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.查找ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.查找ToolStripMenuItem.Text = "查找";
-            this.查找ToolStripMenuItem.Click += new System.EventHandler(this.查找ToolStripMenuItem_Click);
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(177, 22);
+            this.toolStripMenuItem2.Text = "_(:3」∠)_";
+            this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
             // 
             // MainForm
             // 
@@ -496,7 +507,7 @@
             this.MinimumSize = new System.Drawing.Size(800, 500);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "恋选PSP文本处理器 Ver 0.57 Beta";
+            this.Text = "恋选PSP文本处理器 Ver 0.61 Beta";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.mainMenuStrip.ResumeLayout(false);
@@ -558,6 +569,7 @@
         private System.Windows.Forms.ToolStripMenuItem 全选ToolStripMenuItem;
         private System.Windows.Forms.ToolStripTextBox QuickSearchTextBox;
         private System.Windows.Forms.ToolStripMenuItem 查找ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
     }
 }
 

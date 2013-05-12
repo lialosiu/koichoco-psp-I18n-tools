@@ -163,6 +163,29 @@ namespace 恋选PSP文本处理器
         }
 
         /// <summary>
+        /// 生成txt码表
+        /// </summary>
+        /// <param name="chsCodeTable">译文对应码表</param>
+        /// <param name="outputFilePath">输出文件路径</param>
+        /// <returns>是否成功</returns>
+        public static Boolean buildTheTxtCodeTableFile(CodeTable chsCodeTable)//, String outputFilePath)
+        {
+            FileStream outputFileStream_txt = new FileStream("chsCodeTable.txt", FileMode.Create, FileAccess.ReadWrite);
+            StreamWriter outputStreamWriter_txt = new StreamWriter(outputFileStream_txt, Encoding.Unicode);
+
+            List<Char> chsCharList = chsCodeTable.getAllCharAsList();
+
+            for (Int32 i = 0; i < chsCharList.Count; i++)
+            {
+                Char thisChar = chsCharList[i];
+                outputStreamWriter_txt.WriteLine((i % 0x100).ToString("X2") + (i / 0x100).ToString("X2") + '=' + thisChar);
+            }
+            outputStreamWriter_txt.Close();
+            outputFileStream_txt.Close();
+            return true;
+        }
+
+        /// <summary>
         /// 生成游戏文件sc.bin
         /// </summary>
         /// <param name="gameText">GameText</param>
@@ -362,6 +385,124 @@ namespace 恋选PSP文本处理器
                         outputFileStream_scbin.Write(_Bytes, 0, 2);
                     }
                 }
+            }
+
+            oriFileStream_scbin.Close();
+
+            Toolkit.updateTheVerifyCode(outputFileStream_scbin);
+
+            outputFileStream_scbin.Close();
+
+            return true;
+        }
+
+        /// <summary>
+        /// 生成游戏文件sc.bin
+        /// </summary>
+        /// <param name="gameText">GameText</param>
+        /// <param name="chsCodeTable">译文对应码表</param>
+        /// <param name="outputFilePath">输出文件路径</param>
+        /// <returns>是否成功</returns>
+        public static Boolean buildTheGameFile_sc_bin__test(GameText gameText, CodeTable chsCodeTable, String outputFilePath)
+        {
+            FileStream oriFileStream_scbin = File.Open(@"sc.bin", FileMode.Open, FileAccess.Read);
+            Int64 offsetTextPtr = 0x90;
+
+            Byte[] _Bytes;
+
+            FileStream outputFileStream_scbin = new FileStream(outputFilePath, FileMode.Create, FileAccess.ReadWrite);
+            oriFileStream_scbin.CopyTo(outputFileStream_scbin);
+
+            Int32 ID = 0;
+            Byte[] ID_Bytes = new Byte[2] { 0, 0 };
+
+            _Bytes = new Byte[4];
+            Int64 ori_offsetTextNow = 0;
+            Int64 ori_offsetTextNext = 0;
+            Int64 chs_offsetTextNow = 0;
+
+            while (true)
+            {
+                //读取指针
+                _Bytes = new Byte[4];
+                oriFileStream_scbin.Seek(offsetTextPtr, SeekOrigin.Begin);
+                oriFileStream_scbin.Read(_Bytes, 0, 4);
+                //换算文本指针所指地址
+                ori_offsetTextNow = ori_offsetTextNext;
+                ori_offsetTextNext = 0x30000 + Convert.ToInt32(_Bytes[3]) * 0x100 * 0x100 * 0x100 + Convert.ToInt32(_Bytes[2]) * 0x100 * 0x100 + Convert.ToInt32(_Bytes[1]) * 0x100 + Convert.ToInt32(_Bytes[0]);
+                if (chs_offsetTextNow == 0) chs_offsetTextNow = ori_offsetTextNext;
+
+                //保存读取【文本指针】的指针当前位置
+                offsetTextPtr = oriFileStream_scbin.Position;
+
+                if (ori_offsetTextNow == 0) continue;
+
+
+                //普通文本指针结束
+                if (offsetTextPtr > 0x2C568)
+                {
+                    offsetTextPtr = 0x2C570;
+                    break;
+                }
+
+                //跳到当前【文本指针】所指位置
+                oriFileStream_scbin.Seek(ori_offsetTextNow, SeekOrigin.Begin);
+
+                List<Byte[]> arow = new List<Byte[]>();
+                //一直循环直到读取位置超过下一个【文本指针】所指地址
+                while (oriFileStream_scbin.Position < ori_offsetTextNext)
+                {
+                    _Bytes = new Byte[2];
+                    oriFileStream_scbin.Read(_Bytes, 0, 2);
+                    arow.Add(_Bytes);
+                }
+
+                //获取原特殊代码
+                Boolean startflag = false;
+                List<Byte[]> result = new List<Byte[]>();
+                foreach (Byte[] thisBytes in arow)
+                {
+                    if (arow.IndexOf(thisBytes) == 1) { ID = Convert.ToInt32(thisBytes[1]) * 0x100 + Convert.ToInt32(thisBytes[0]); ID_Bytes = new Byte[2] { thisBytes[0], thisBytes[1] }; }
+                    if (thisBytes[0] == 0xFE && thisBytes[1] == 0xFF) { startflag = true; continue; }
+                    if (startflag) result.Add(thisBytes);
+                }
+
+                //输出文件定向到指针对应位置
+                outputFileStream_scbin.Seek(chs_offsetTextNow, SeekOrigin.Begin);
+                outputFileStream_scbin.Write(new Byte[] { 0xf0, 0xff }, 0, 2);      //入口
+                outputFileStream_scbin.Write(ID_Bytes, 0, 2);                       //ID
+
+                //获取当前行翻译后姓名与文本
+                String ChsName = gameText.getChsNamebyID(ID);
+                String ChsSentences = gameText.getChsSentencesbyID(ID);
+
+                //姓名处理
+                foreach (Char thisChar in ChsName.ToCharArray())
+                {
+                    Byte[] thisCodeByte = chsCodeTable.getCode(thisChar);
+                    thisCodeByte = (thisCodeByte == null) ? new Byte[] { 0x01, 0x00 } : thisCodeByte;      //0001,'■'
+                    outputFileStream_scbin.Write(thisCodeByte, 0, 2);
+                }
+
+                outputFileStream_scbin.Write(new Byte[] { 0xff, 0xff }, 0, 2);      //分割
+
+                //文本处理
+                foreach (Char thisChar in ChsSentences.ToCharArray())
+                {
+                    Byte[] thisCodeByte = chsCodeTable.getCode(thisChar);
+                    thisCodeByte = (thisCodeByte == null) ? new Byte[] { 0x01, 0x00 } : thisCodeByte;      //0001,'■'
+                    outputFileStream_scbin.Write(thisCodeByte, 0, 2);
+                }
+
+                foreach (Byte[] thisBytes in result)
+                {
+                    outputFileStream_scbin.Write(thisBytes, 0, 2);
+                }
+
+                chs_offsetTextNow = outputFileStream_scbin.Position;
+                outputFileStream_scbin.Seek(offsetTextPtr, SeekOrigin.Begin);
+                Int64 chs_offsetTextNow_forptr = chs_offsetTextNow - 0x30000;
+                outputFileStream_scbin.Write(new Byte[] { Convert.ToByte(chs_offsetTextNow_forptr % 0x100), Convert.ToByte((chs_offsetTextNow_forptr / 0x100) % 0x100), Convert.ToByte((chs_offsetTextNow_forptr / 0x100 / 0x100) % 0x100), Convert.ToByte((chs_offsetTextNow_forptr / 0x100 / 0x100 / 0x100) % 0x100) }, 0, 4);
             }
 
             oriFileStream_scbin.Close();

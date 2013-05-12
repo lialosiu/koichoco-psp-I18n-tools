@@ -458,5 +458,40 @@ namespace 恋选PSP文本处理器
             toolStripStatusLabel1.Text = "已翻：" + textGCount + " | 超长：" + textYCount + " | 未翻：" + textWCount;
         }
 
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            panel_Waiting.Visible = true;
+            panel_Waiting.Refresh();
+
+            SaveFileDialog output_ltbin = new SaveFileDialog();
+            output_ltbin.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            output_ltbin.FileName = "lt";
+            output_ltbin.DefaultExt = ".bin";
+            output_ltbin.Filter = "恋选PSP字库文件|lt.bin";
+            
+            SaveFileDialog output_scbin = new SaveFileDialog();
+            output_scbin.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            output_scbin.FileName = "sc";
+            output_scbin.DefaultExt = ".bin";
+            output_scbin.Filter = "恋选PSP脚本文件|sc.bin";
+
+            if (output_ltbin.ShowDialog() != DialogResult.OK || output_scbin.ShowDialog() != DialogResult.OK)
+            {
+                MessageBox.Show("操作已取消");
+                panel_Waiting.Visible = false;
+                return;
+            }
+
+            CodeTable chsCodeTable = CodeTable.CodeTableFactory(GameText.UsedChsCharListFactory((gameText.getAllNot2AsList())));
+            Toolkit.buildTheTxtCodeTableFile(chsCodeTable);
+            Toolkit.buildTheGameFile_lt_bin(chsCodeTable, output_ltbin.FileName);
+            Toolkit.buildTheGameFile_sc_bin__test(gameText, chsCodeTable, output_scbin.FileName);
+
+            panel_Waiting.Visible = false;
+
+            MessageBox.Show(null, "生成成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            toolStripStatusLabel1.Text = "生成成功";
+        }
+
     }
 }

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Timers;
+using System.Text.RegularExpressions;
 
 namespace 恋选PSP文本处理器
 {
@@ -213,7 +214,7 @@ namespace 恋选PSP文本处理器
             Reload_DataGridView();
         }
 
-        private void 生成scbin和ltbinToolStripMenuItem_Click(object sender, EventArgs e)
+        private void BuildBinFile_old_ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             panel_Waiting.Visible = true;
             panel_Waiting.Refresh();
@@ -238,8 +239,9 @@ namespace 恋选PSP文本处理器
             }
 
             CodeTable chsCodeTable = CodeTable.CodeTableFactory(GameText.UsedChsCharListFactory((gameText.getAllNot2AsList())));
-            Toolkit.buildTheGameFile_lt_bin(chsCodeTable, output_ltbin.FileName);
-            Toolkit.buildTheGameFile_sc_bin(gameText, chsCodeTable, output_scbin.FileName);
+            //Toolkit.buildTheTxtCodeTableFile(chsCodeTable);
+            Toolkit.buildTheGameFile_lt_bin(chsCodeTable, output_ltbin.FileName, false);
+            Toolkit.buildTheGameFile_sc_bin_old(gameText, chsCodeTable, output_scbin.FileName);
 
             panel_Waiting.Visible = false;
 
@@ -249,7 +251,7 @@ namespace 恋选PSP文本处理器
 
         private void 说明ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(null, "状态着色：" + Environment.NewLine + "绿色：已翻译文本" + Environment.NewLine + "黄色：已翻译，但长度越界文本" + Environment.NewLine + "白色：未翻译文本", "说明");
+            MessageBox.Show(null, "本程序仅供恋选PSP版汉化工作使用" + Environment.NewLine + "By Lialosiu", "说明");
         }
 
         private void textBox_ChsText_KeyPress(object sender, KeyPressEventArgs e)
@@ -367,7 +369,6 @@ namespace 恋选PSP文本处理器
         private void saveFile(String fileName, String tips)
         {
             Toolkit.serializeGameTextToFile(fileName, this.gameText);
-            toolStripStatusLabel1.Text = tips;
         }
 
         private void 全选ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -406,26 +407,58 @@ namespace 恋选PSP文本处理器
         private Boolean SearchTextAtDataGridView(Int32 step, Boolean searchType, String searchText)
         {
             Int32 rowIndex = dataGridView.CurrentRow.Index + step;
-            while (true)
+            if (Regex.Match(searchText, @"\/，").Success)
             {
-                if (rowIndex >= dataGridView.RowCount) break;
-                if (rowIndex <= 0) break;
-                Int32 indexInText = dataGridView.Rows[rowIndex].Cells[searchType ? 4 : 3].Value.ToString().IndexOf(searchText);
-                if (indexInText != -1)
+                while (true)
                 {
-                    dataGridView.CurrentCell = dataGridView.Rows[rowIndex].Cells[0];
-                    (searchType ? textBox_ChsText : textBox_OriText).Select(indexInText, searchText.Length);
-                    (searchType ? textBox_ChsText : textBox_OriText).Focus();
-                    return true;
+                    if (rowIndex >= dataGridView.RowCount) break;
+                    if (rowIndex <= 0) break;
+                    Match searchText_Match = Regex.Match(dataGridView.Rows[rowIndex].Cells[searchType ? 4 : 3].Value.ToString(), @"(.*)(.)(，)(.)(.*)");
+                    if (searchText_Match.Success && searchText_Match.Groups[2].ToString() == searchText_Match.Groups[4].ToString())
+                    {
+                        dataGridView.CurrentCell = dataGridView.Rows[rowIndex].Cells[0];
+                        (searchType ? textBox_ChsText : textBox_OriText).Select(searchText_Match.Groups[3].Index, 1);
+                        (searchType ? textBox_ChsText : textBox_OriText).Focus();
+                        return true;
+                    }
+                    rowIndex += step;
                 }
-                rowIndex += step;
+            }
+            else if (Regex.Match(searchText, @"\/艹飞对话句末的句号").Success)
+            {
+                foreach (GameText.Line thisLine in gameText.getAllAsList())
+                {
+                    Match searchText_Match = Regex.Match(thisLine.chsSentences, @"(.*)。$");
+                    if (searchText_Match.Success && thisLine.oriName != "")
+                    {
+                        thisLine.chsSentences = searchText_Match.Groups[1].Value.ToString();
+                    }
+                }
+                Reload_DataGridView();
+            }
+            else
+            {
+                while (true)
+                {
+                    if (rowIndex >= dataGridView.RowCount) break;
+                    if (rowIndex <= 0) break;
+                    Int32 indexInText = dataGridView.Rows[rowIndex].Cells[searchType ? 4 : 3].Value.ToString().IndexOf(searchText);
+                    if (indexInText != -1)
+                    {
+                        dataGridView.CurrentCell = dataGridView.Rows[rowIndex].Cells[0];
+                        (searchType ? textBox_ChsText : textBox_OriText).Select(indexInText, searchText.Length);
+                        (searchType ? textBox_ChsText : textBox_OriText).Focus();
+                        return true;
+                    }
+                    rowIndex += step;
+                }
             }
             return false;
         }
 
         private void ReplaceTextAtDataGridView(String searchText, String replaceText)
         {
-            if (textBox_ChsText.SelectedText == searchText)
+            if (textBox_ChsText.SelectedText == searchText || Regex.Match(searchText, @"\/，").Success)
             {
                 textBox_ChsText.SelectedText = replaceText;
                 textBox_ChsText.Select(textBox_ChsText.Text.IndexOf(replaceText), replaceText.Length);
@@ -458,7 +491,7 @@ namespace 恋选PSP文本处理器
             toolStripStatusLabel1.Text = "已翻：" + textGCount + " | 超长：" + textYCount + " | 未翻：" + textWCount;
         }
 
-        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        private void buildBinFile_ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             panel_Waiting.Visible = true;
             panel_Waiting.Refresh();
@@ -468,7 +501,7 @@ namespace 恋选PSP文本处理器
             output_ltbin.FileName = "lt";
             output_ltbin.DefaultExt = ".bin";
             output_ltbin.Filter = "恋选PSP字库文件|lt.bin";
-            
+
             SaveFileDialog output_scbin = new SaveFileDialog();
             output_scbin.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             output_scbin.FileName = "sc";
@@ -483,14 +516,73 @@ namespace 恋选PSP文本处理器
             }
 
             CodeTable chsCodeTable = CodeTable.CodeTableFactory(GameText.UsedChsCharListFactory((gameText.getAllNot2AsList())));
-            Toolkit.buildTheTxtCodeTableFile(chsCodeTable);
-            Toolkit.buildTheGameFile_lt_bin(chsCodeTable, output_ltbin.FileName);
-            Toolkit.buildTheGameFile_sc_bin__test(gameText, chsCodeTable, output_scbin.FileName);
+            //Toolkit.buildTheTxtCodeTableFile(chsCodeTable);
+            Toolkit.buildTheGameFile_lt_bin(chsCodeTable, output_ltbin.FileName, false);
+            Toolkit.buildTheGameFile_sc_bin(gameText, chsCodeTable, output_scbin.FileName);
 
             panel_Waiting.Visible = false;
 
             MessageBox.Show(null, "生成成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
             toolStripStatusLabel1.Text = "生成成功";
+        }
+
+        private void buildBinFile_cht_ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            panel_Waiting.Visible = true;
+            panel_Waiting.Refresh();
+
+            SaveFileDialog output_ltbin = new SaveFileDialog();
+            output_ltbin.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            output_ltbin.FileName = "lt";
+            output_ltbin.DefaultExt = ".bin";
+            output_ltbin.Filter = "恋选PSP字库文件|lt.bin";
+
+            SaveFileDialog output_scbin = new SaveFileDialog();
+            output_scbin.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            output_scbin.FileName = "sc";
+            output_scbin.DefaultExt = ".bin";
+            output_scbin.Filter = "恋选PSP脚本文件|sc.bin";
+
+            if (output_ltbin.ShowDialog() != DialogResult.OK || output_scbin.ShowDialog() != DialogResult.OK)
+            {
+                MessageBox.Show("操作已取消");
+                panel_Waiting.Visible = false;
+                return;
+            }
+
+            CodeTable chsCodeTable = CodeTable.CodeTableFactory(GameText.UsedChsCharListFactory((gameText.getAllNot2AsList())));
+            //Toolkit.buildTheTxtCodeTableFile(chsCodeTable);
+            Toolkit.buildTheGameFile_lt_bin(chsCodeTable, output_ltbin.FileName, true);
+            Toolkit.buildTheGameFile_sc_bin(gameText, chsCodeTable, output_scbin.FileName);
+
+            panel_Waiting.Visible = false;
+
+            MessageBox.Show(null, "生成成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            toolStripStatusLabel1.Text = "生成成功";
+        }
+
+        private void 字体ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FontDialog fontDialog = new FontDialog();
+            fontDialog.Font = textBox_ChsText.Font;
+            if (fontDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBox_ChsText.Font = fontDialog.Font;
+            }
+        }
+
+        private void 自动保存ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (自动保存ToolStripMenuItem.Checked)
+            {
+                autoSaveTimer.Enabled = false;
+                自动保存ToolStripMenuItem.Checked = false;
+            }
+            else
+            {
+                autoSaveTimer.Enabled = true;
+                自动保存ToolStripMenuItem.Checked = true;
+            }
         }
 
     }

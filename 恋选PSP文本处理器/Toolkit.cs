@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Text;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -41,14 +42,17 @@ namespace 恋选PSP文本处理器
             List<Byte> thisBytes = new List<Byte>();
             Bitmap bmp = new Bitmap(16, 16);
             Graphics graphics = Graphics.FromImage(bmp);
-            graphics.DrawString(character.ToString(), font, new SolidBrush(Color.White), 0, -1);
+            graphics.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            graphics.DrawString(character.ToString(), font, new SolidBrush(Color.White), -1, 2);
 
             for (int nowHeight = 0; nowHeight < bmp.Height; nowHeight++)
             {
                 for (int nowWidth = 0; nowWidth < bmp.Width; nowWidth += 2)
                 {
-                    Int32 huidu1 = Convert.ToInt32((0.3 * bmp.GetPixel(nowWidth, nowHeight).R + 0.6 * bmp.GetPixel(nowWidth, nowHeight).G + 0.1 * bmp.GetPixel(nowWidth, nowHeight).B) / 36);
-                    Int32 huidu2 = Convert.ToInt32((0.3 * bmp.GetPixel(nowWidth + 1, nowHeight).R + 0.6 * bmp.GetPixel(nowWidth + 1, nowHeight).G + 0.1 * bmp.GetPixel(nowWidth + 1, nowHeight).B) / 36);
+                    Int32 huidu1 = Convert.ToInt32((0.3 * bmp.GetPixel(nowWidth, nowHeight).R + 0.59 * bmp.GetPixel(nowWidth, nowHeight).G + 0.11 * bmp.GetPixel(nowWidth, nowHeight).B) / 0x20 - 1);
+                    Int32 huidu2 = Convert.ToInt32((0.3 * bmp.GetPixel(nowWidth + 1, nowHeight).R + 0.59 * bmp.GetPixel(nowWidth + 1, nowHeight).G + 0.11 * bmp.GetPixel(nowWidth + 1, nowHeight).B) / 0x20 - 1);
+                    if (huidu1 <= 0) huidu1 = 0;
+                    if (huidu2 <= 0) huidu2 = 0;
                     Int32 huidu = huidu2 * 0x10 + huidu1;
                     thisBytes.Add((Byte)huidu);
                 }
@@ -129,13 +133,33 @@ namespace 恋选PSP文本处理器
             }
         }
 
+        public static Int64 Bytes2Int64(Byte[] theData)
+        {
+            Int64 result = 0;
+            for (Int32 index = theData.Length - 1; index >= 0; index--)
+                result = result * 0x100 + Convert.ToInt32(theData[index]);
+            return result;
+        }
+
+        public static Byte[] Int642Bytes(Int64 theInt64, Int32 c)
+        {
+            Byte[] result = new Byte[c];
+            Int32 index = 0;
+            while (theInt64 != 0)
+            {
+                result[index++] = (Byte)(theInt64 % 0x100);
+                theInt64 /= 0x100;
+            }
+            return result;
+        }
+
         /// <summary>
         /// 生成游戏文件lt.bin
         /// </summary>
         /// <param name="chsCodeTable">译文对应码表</param>
         /// <param name="outputFilePath">输出文件路径</param>
         /// <returns>是否成功</returns>
-        public static Boolean buildTheGameFile_lt_bin(CodeTable chsCodeTable, String outputFilePath)
+        public static Boolean buildTheGameFile_lt_bin(CodeTable chsCodeTable, String outputFilePath, bool type)
         {
             FileStream oriFileStream_ltbin = File.Open(@"lt.bin", FileMode.Open, FileAccess.Read);
             FileStream outputFileStream_ltbin = new FileStream(outputFilePath, FileMode.Create, FileAccess.ReadWrite);
@@ -143,13 +167,23 @@ namespace 恋选PSP文本处理器
             outputFileStream_ltbin.Seek(0, SeekOrigin.Begin);
 
             BinaryWriter outputFileBinaryWriter_ltbin = new BinaryWriter(outputFileStream_ltbin);
-
+                        
             List<Char> chsCharList = chsCodeTable.getAllCharAsList();
+
+            if (type) chsCharList = new List<Char>(Toolkit.ChsChangeToCht(new String(chsCharList.ToArray())).ToCharArray());
+
+            Font thisFont = new Font("微软雅黑", 10);
+            FontDialog fontDialog = new FontDialog();
+            fontDialog.Font = thisFont;
+            if (fontDialog.ShowDialog() == DialogResult.OK)
+            {
+                thisFont = fontDialog.Font;
+            }
 
             for (Int32 i = 0; i < chsCharList.Count; i++)
             {
                 Char thisChar = chsCharList[i];
-                List<Byte> thisBytes = Toolkit.Character2Bytes(thisChar, new Font("微软雅黑", 10));
+                List<Byte> thisBytes = Toolkit.Character2Bytes(thisChar, thisFont);
                 outputFileBinaryWriter_ltbin.Write(thisBytes.ToArray());
             }
 
@@ -185,6 +219,7 @@ namespace 恋选PSP文本处理器
             return true;
         }
 
+
         /// <summary>
         /// 生成游戏文件sc.bin
         /// </summary>
@@ -193,6 +228,201 @@ namespace 恋选PSP文本处理器
         /// <param name="outputFilePath">输出文件路径</param>
         /// <returns>是否成功</returns>
         public static Boolean buildTheGameFile_sc_bin(GameText gameText, CodeTable chsCodeTable, String outputFilePath)
+        {
+            FileStream oriFileStream_scbin = File.Open(@"sc.bin", FileMode.Open, FileAccess.Read);
+
+            FileStream outputFileStream_scbin = new FileStream(outputFilePath, FileMode.Create, FileAccess.ReadWrite);
+            oriFileStream_scbin.CopyTo(outputFileStream_scbin);
+
+            Dictionary<Int64, Int64> normalPtrDicV2K = new Dictionary<Int64, Int64>();
+            Dictionary<Int64, Int64> normalPtrDicK2V = new Dictionary<Int64, Int64>();
+            Dictionary<Int64, Int64> choosePtrDicV2K = new Dictionary<Int64, Int64>();
+            Dictionary<Int64, Int64> choosePtrDicK2V = new Dictionary<Int64, Int64>();
+            Dictionary<Int64, List<Int64>> specialPtrDicV2K = new Dictionary<Int64, List<Int64>>();
+            Dictionary<Int64, Int64> specialPtrDicK2V = new Dictionary<Int64, Int64>();
+
+            //读取所有普通指针
+            oriFileStream_scbin.Seek(0x90, SeekOrigin.Begin);
+            while (oriFileStream_scbin.Position < 0x2c568)
+            {
+                Int64 position = oriFileStream_scbin.Position;
+                Byte[] theData = new Byte[4];
+                oriFileStream_scbin.Read(theData, 0, 4);
+                normalPtrDicV2K.Add(Bytes2Int64(theData) + 0x30000, position);
+            }
+
+            //读取所有选项指针
+            oriFileStream_scbin.Seek(0x2c570, SeekOrigin.Begin);
+            while (oriFileStream_scbin.Position < 0x2c7b0)
+            {
+                Int64 position = oriFileStream_scbin.Position;
+                Byte[] theData = new Byte[4];
+                oriFileStream_scbin.Read(theData, 0, 4);
+                while (Bytes2Int64(theData) != 0)
+                {
+                    oriFileStream_scbin.Read(theData, 0, 4);
+                    if (Bytes2Int64(theData) == 0) break;
+                    choosePtrDicV2K.Add(Bytes2Int64(theData) + 0x30000, oriFileStream_scbin.Position - 4);
+                }
+            }
+
+            //读取所有特殊指针
+            oriFileStream_scbin.Seek(0x30000, SeekOrigin.Begin);
+            while (oriFileStream_scbin.Position < 0x324e4)
+            {
+                Int64 position = oriFileStream_scbin.Position;
+                Byte[] theData = new Byte[4];
+                oriFileStream_scbin.Read(theData, 0, 4);
+                List<Int64> thisList;
+                if (specialPtrDicV2K.ContainsKey(Bytes2Int64(theData) + 0x30000)) thisList = specialPtrDicV2K[Bytes2Int64(theData) + 0x30000]; else thisList = new List<Int64>();
+                thisList.Add(position);
+                specialPtrDicV2K[Bytes2Int64(theData) + 0x30000] = thisList;
+            }
+
+            //解析脚本
+            oriFileStream_scbin.Seek(0x324e4, SeekOrigin.Begin);
+            outputFileStream_scbin.Seek(0x324e4, SeekOrigin.Begin);
+            while (oriFileStream_scbin.Position < 0x35e050)
+            {
+                Byte[] thisDataBytes = new Byte[2];
+
+                //检查普通指针
+                if (normalPtrDicV2K.ContainsKey(oriFileStream_scbin.Position))
+                {
+                    normalPtrDicK2V.Add(normalPtrDicV2K[oriFileStream_scbin.Position], outputFileStream_scbin.Position);
+                }
+                //检查选项指针
+                if (choosePtrDicV2K.ContainsKey(oriFileStream_scbin.Position))
+                {
+                    choosePtrDicK2V.Add(choosePtrDicV2K[oriFileStream_scbin.Position], outputFileStream_scbin.Position);
+                }
+                //检查特殊指针
+                if (specialPtrDicV2K.ContainsKey(oriFileStream_scbin.Position))
+                {
+                    foreach (Int64 thisKey in specialPtrDicV2K[oriFileStream_scbin.Position])
+                        specialPtrDicK2V.Add(thisKey, outputFileStream_scbin.Position);
+                }
+
+                oriFileStream_scbin.Read(thisDataBytes, 0, 2);
+
+                Int32 thisData = Convert.ToInt32(Bytes2Int64(thisDataBytes));
+                switch (thisData)
+                {
+                    case 0xfff0:
+                        outputFileStream_scbin.Write(thisDataBytes, 0, 2);
+                        oriFileStream_scbin.Read(thisDataBytes, 0, 2);
+
+                        //ID
+                        Int32 ID = Convert.ToInt32(Bytes2Int64(thisDataBytes));
+                        outputFileStream_scbin.Write(thisDataBytes, 0, 2);
+
+                        String chsName = gameText.getChsNamebyID(ID);
+                        String chsSentences = gameText.getChsSentencesbyID(ID);
+
+                        //姓名处理
+                        foreach (Char thisChar in chsName.ToCharArray())
+                        {
+                            Byte[] thisCodeByte = chsCodeTable.getCode(thisChar);
+                            thisCodeByte = (thisCodeByte == null) ? new Byte[] { 0x01, 0x00 } : thisCodeByte;       //0001,'■'
+                            outputFileStream_scbin.Write(thisCodeByte, 0, 2);
+                        }
+
+                        outputFileStream_scbin.Write(new Byte[] { 0xff, 0xff }, 0, 2);                              //分割
+
+                        //文本处理
+                        foreach (Char thisChar in chsSentences.ToCharArray())
+                        {
+                            Byte[] thisCodeByte = chsCodeTable.getCode(thisChar);
+                            thisCodeByte = (thisCodeByte == null) ? new Byte[] { 0x01, 0x00 } : thisCodeByte;       //0001,'■'
+                            outputFileStream_scbin.Write(thisCodeByte, 0, 2);
+                        }
+                        do { oriFileStream_scbin.Read(thisDataBytes, 0, 2); } while (Bytes2Int64(thisDataBytes) != 0xfffe);
+                        outputFileStream_scbin.Write(thisDataBytes, 0, 2);
+                        break;
+
+                    default:
+                        if (choosePtrDicV2K.ContainsKey(oriFileStream_scbin.Position - 2))
+                        {
+                            //处理选项文本
+                            while (true)
+                            {
+                                oriFileStream_scbin.Read(thisDataBytes, 0, 2);
+
+                                if (thisDataBytes[0] == 0xFF && thisDataBytes[1] == 0xFF)     //结束标记
+                                {
+                                    oriFileStream_scbin.Read(thisDataBytes, 0, 2);
+                                    oriFileStream_scbin.Read(thisDataBytes, 0, 2);
+
+                                    //自定义ID，读取的ID号+9W
+                                    Int32 _ID = 90000 + Convert.ToInt32(thisDataBytes[1]) * 0x100 + Convert.ToInt32(thisDataBytes[0]);
+                                    String _chsSentences = gameText.getChsSentencesbyID(_ID);
+
+                                    foreach (Char thisChar in _chsSentences.ToCharArray())
+                                    {
+                                        Byte[] thisCodeByte = chsCodeTable.getCode(thisChar);
+                                        thisCodeByte = (thisCodeByte == null) ? new Byte[] { 0x01, 0x00 } : thisCodeByte;       //0001,'■'
+                                        outputFileStream_scbin.Write(thisCodeByte, 0, 2);
+                                    }
+
+                                    outputFileStream_scbin.Write(new Byte[] { 0xff, 0xff }, 0, 2);
+                                    outputFileStream_scbin.Write(new Byte[] { 0x00, 0x00 }, 0, 2);
+                                    outputFileStream_scbin.Write(thisDataBytes, 0, 2);
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                            outputFileStream_scbin.Write(thisDataBytes, 0, 2);
+                        break;
+                }
+            }
+
+            //补零
+            while (outputFileStream_scbin.Position < 0x35efe0)
+            {
+                outputFileStream_scbin.Write(new Byte[2] { 0, 0 }, 0, 2);
+            }
+
+            //更新所有普通指针
+            outputFileStream_scbin.Seek(0x90, SeekOrigin.Begin);
+            while (outputFileStream_scbin.Position < 0x2c568)
+            {
+                outputFileStream_scbin.Write(Int642Bytes(normalPtrDicK2V[outputFileStream_scbin.Position] - 0x30000, 4), 0, 4);
+            }
+
+            //更新所有选项指针
+            outputFileStream_scbin.Seek(0x2c570, SeekOrigin.Begin);
+            while (outputFileStream_scbin.Position < 0x2c7b0)
+            {
+                if (choosePtrDicK2V.ContainsKey(outputFileStream_scbin.Position)) outputFileStream_scbin.Write(Int642Bytes(choosePtrDicK2V[outputFileStream_scbin.Position] - 0x30000, 4), 0, 4);
+                else outputFileStream_scbin.Seek(4, SeekOrigin.Current);
+            }
+
+            //更新所有特殊指针
+            outputFileStream_scbin.Seek(0x30000, SeekOrigin.Begin);
+            while (outputFileStream_scbin.Position < 0x324e4)
+            {
+                if (specialPtrDicK2V.ContainsKey(outputFileStream_scbin.Position)) outputFileStream_scbin.Write(Int642Bytes(specialPtrDicK2V[outputFileStream_scbin.Position] - 0x30000, 4), 0, 4);
+                else outputFileStream_scbin.Seek(4, SeekOrigin.Current);
+            }
+
+            oriFileStream_scbin.Close();
+
+            Toolkit.updateTheVerifyCode(outputFileStream_scbin);
+
+            outputFileStream_scbin.Close();
+
+            return true;
+        }
+
+        /// <summary>
+        /// 生成游戏文件sc.bin
+        /// </summary>
+        /// <param name="gameText">GameText</param>
+        /// <param name="chsCodeTable">译文对应码表</param>
+        /// <param name="outputFilePath">输出文件路径</param>
+        /// <returns>是否成功</returns>
+        public static Boolean buildTheGameFile_sc_bin_old(GameText gameText, CodeTable chsCodeTable, String outputFilePath)
         {
             FileStream oriFileStream_scbin = File.Open(@"sc.bin", FileMode.Open, FileAccess.Read);
             Int64 offsetTextPoint = 0x90;
@@ -396,122 +626,113 @@ namespace 恋选PSP文本处理器
             return true;
         }
 
-        /// <summary>
-        /// 生成游戏文件sc.bin
-        /// </summary>
-        /// <param name="gameText">GameText</param>
-        /// <param name="chsCodeTable">译文对应码表</param>
-        /// <param name="outputFilePath">输出文件路径</param>
-        /// <returns>是否成功</returns>
-        public static Boolean buildTheGameFile_sc_bin__test(GameText gameText, CodeTable chsCodeTable, String outputFilePath)
+        public static void outputSC_txt(CodeTable oriCodeTable)
         {
             FileStream oriFileStream_scbin = File.Open(@"sc.bin", FileMode.Open, FileAccess.Read);
-            Int64 offsetTextPtr = 0x90;
+            StreamWriter sctxt = new StreamWriter(new FileStream(@"sc.txt", FileMode.Create, FileAccess.ReadWrite));
+            Dictionary<Int64, Int64> normalPtr = new Dictionary<Int64, Int64>();
+            Dictionary<Int64, List<Int64>> specialPtr = new Dictionary<Int64, List<Int64>>();
 
-            Byte[] _Bytes;
-
-            FileStream outputFileStream_scbin = new FileStream(outputFilePath, FileMode.Create, FileAccess.ReadWrite);
-            oriFileStream_scbin.CopyTo(outputFileStream_scbin);
-
-            Int32 ID = 0;
-            Byte[] ID_Bytes = new Byte[2] { 0, 0 };
-
-            _Bytes = new Byte[4];
-            Int64 ori_offsetTextNow = 0;
-            Int64 ori_offsetTextNext = 0;
-            Int64 chs_offsetTextNow = 0;
-
-            while (true)
+            //读取所有普通指针
+            oriFileStream_scbin.Seek(0x90, SeekOrigin.Begin);
+            while (oriFileStream_scbin.Position < 0x2c568)
             {
-                //读取指针
-                _Bytes = new Byte[4];
-                oriFileStream_scbin.Seek(offsetTextPtr, SeekOrigin.Begin);
-                oriFileStream_scbin.Read(_Bytes, 0, 4);
-                //换算文本指针所指地址
-                ori_offsetTextNow = ori_offsetTextNext;
-                ori_offsetTextNext = 0x30000 + Convert.ToInt32(_Bytes[3]) * 0x100 * 0x100 * 0x100 + Convert.ToInt32(_Bytes[2]) * 0x100 * 0x100 + Convert.ToInt32(_Bytes[1]) * 0x100 + Convert.ToInt32(_Bytes[0]);
-                if (chs_offsetTextNow == 0) chs_offsetTextNow = ori_offsetTextNext;
-
-                //保存读取【文本指针】的指针当前位置
-                offsetTextPtr = oriFileStream_scbin.Position;
-
-                if (ori_offsetTextNow == 0) continue;
-
-
-                //普通文本指针结束
-                if (offsetTextPtr > 0x2C568)
-                {
-                    offsetTextPtr = 0x2C570;
-                    break;
-                }
-
-                //跳到当前【文本指针】所指位置
-                oriFileStream_scbin.Seek(ori_offsetTextNow, SeekOrigin.Begin);
-
-                List<Byte[]> arow = new List<Byte[]>();
-                //一直循环直到读取位置超过下一个【文本指针】所指地址
-                while (oriFileStream_scbin.Position < ori_offsetTextNext)
-                {
-                    _Bytes = new Byte[2];
-                    oriFileStream_scbin.Read(_Bytes, 0, 2);
-                    arow.Add(_Bytes);
-                }
-
-                //获取原特殊代码
-                Boolean startflag = false;
-                List<Byte[]> result = new List<Byte[]>();
-                foreach (Byte[] thisBytes in arow)
-                {
-                    if (arow.IndexOf(thisBytes) == 1) { ID = Convert.ToInt32(thisBytes[1]) * 0x100 + Convert.ToInt32(thisBytes[0]); ID_Bytes = new Byte[2] { thisBytes[0], thisBytes[1] }; }
-                    if (thisBytes[0] == 0xFE && thisBytes[1] == 0xFF) { startflag = true; continue; }
-                    if (startflag) result.Add(thisBytes);
-                }
-
-                //输出文件定向到指针对应位置
-                outputFileStream_scbin.Seek(chs_offsetTextNow, SeekOrigin.Begin);
-                outputFileStream_scbin.Write(new Byte[] { 0xf0, 0xff }, 0, 2);      //入口
-                outputFileStream_scbin.Write(ID_Bytes, 0, 2);                       //ID
-
-                //获取当前行翻译后姓名与文本
-                String ChsName = gameText.getChsNamebyID(ID);
-                String ChsSentences = gameText.getChsSentencesbyID(ID);
-
-                //姓名处理
-                foreach (Char thisChar in ChsName.ToCharArray())
-                {
-                    Byte[] thisCodeByte = chsCodeTable.getCode(thisChar);
-                    thisCodeByte = (thisCodeByte == null) ? new Byte[] { 0x01, 0x00 } : thisCodeByte;      //0001,'■'
-                    outputFileStream_scbin.Write(thisCodeByte, 0, 2);
-                }
-
-                outputFileStream_scbin.Write(new Byte[] { 0xff, 0xff }, 0, 2);      //分割
-
-                //文本处理
-                foreach (Char thisChar in ChsSentences.ToCharArray())
-                {
-                    Byte[] thisCodeByte = chsCodeTable.getCode(thisChar);
-                    thisCodeByte = (thisCodeByte == null) ? new Byte[] { 0x01, 0x00 } : thisCodeByte;      //0001,'■'
-                    outputFileStream_scbin.Write(thisCodeByte, 0, 2);
-                }
-
-                foreach (Byte[] thisBytes in result)
-                {
-                    outputFileStream_scbin.Write(thisBytes, 0, 2);
-                }
-
-                chs_offsetTextNow = outputFileStream_scbin.Position;
-                outputFileStream_scbin.Seek(offsetTextPtr, SeekOrigin.Begin);
-                Int64 chs_offsetTextNow_forptr = chs_offsetTextNow - 0x30000;
-                outputFileStream_scbin.Write(new Byte[] { Convert.ToByte(chs_offsetTextNow_forptr % 0x100), Convert.ToByte((chs_offsetTextNow_forptr / 0x100) % 0x100), Convert.ToByte((chs_offsetTextNow_forptr / 0x100 / 0x100) % 0x100), Convert.ToByte((chs_offsetTextNow_forptr / 0x100 / 0x100 / 0x100) % 0x100) }, 0, 4);
+                Int64 position = oriFileStream_scbin.Position;
+                Byte[] theData = new Byte[4];
+                oriFileStream_scbin.Read(theData, 0, 4);
+                normalPtr.Add(Bytes2Int64(theData), position);
             }
 
+            //读取所有特殊指针
+            oriFileStream_scbin.Seek(0x30000, SeekOrigin.Begin);
+            while (oriFileStream_scbin.Position < 0x324e4)
+            {
+                Int64 position = oriFileStream_scbin.Position;
+                Byte[] theData = new Byte[4];
+                oriFileStream_scbin.Read(theData, 0, 4);
+
+                List<Int64> thisList;
+                if (specialPtr.ContainsKey(Bytes2Int64(theData))) thisList = specialPtr[Bytes2Int64(theData)]; else thisList = new List<Int64>();
+                thisList.Add(position);
+                specialPtr.Add(Bytes2Int64(theData), thisList);
+            }
+
+
+            Boolean flag = false;
+
+            //解析脚本
+            oriFileStream_scbin.Seek(0x324e4, SeekOrigin.Begin);
+            while (oriFileStream_scbin.Position < 0x35e050)
+            {
+                Byte[] theData = new Byte[2];
+                if (normalPtr.ContainsKey(oriFileStream_scbin.Position - 0x30000)) { sctxt.WriteLine(); sctxt.Write("[普通指针][" + normalPtr[oriFileStream_scbin.Position - 0x30000] + "]"); }
+                if (specialPtr.ContainsKey(oriFileStream_scbin.Position - 0x30000)) { sctxt.WriteLine(); sctxt.Write("[特殊指针][" + specialPtr[oriFileStream_scbin.Position - 0x30000] + "]"); }
+                oriFileStream_scbin.Read(theData, 0, 2);
+                Int32 theInt32 = Convert.ToInt32(Bytes2Int64(theData));
+                switch (theInt32)
+                {
+                    case 0xff68:
+                        sctxt.WriteLine();
+                        sctxt.Write("[语音]");
+                        oriFileStream_scbin.Read(theData, 0, 2);
+                        sctxt.Write("[ID:" + Bytes2Int64(theData) + "]");
+                        oriFileStream_scbin.Read(theData, 0, 2);
+                        sctxt.Write("[人物:" + Bytes2Int64(theData) + "]");
+                        break;
+
+                    case 0xfff0:
+                        sctxt.WriteLine();
+                        sctxt.Write("[文本]");
+                        oriFileStream_scbin.Read(theData, 0, 2);
+                        sctxt.Write("[ID:" + Bytes2Int64(theData) + "]");
+                        flag = true;
+                        break;
+
+                    case 0xfffb:
+                        sctxt.WriteLine();
+                        sctxt.Write("[清空文本]");
+                        flag = false;
+                        break;
+
+                    case 0xfffd:
+                        sctxt.WriteLine();
+                        sctxt.Write("[保留文本]");
+                        flag = false;
+                        break;
+
+                    case 0xfffe:
+                        sctxt.WriteLine();
+                        sctxt.Write("[等待输入]");
+                        flag = false;
+                        break;
+
+                    case 0xffff:
+                        if (flag) sctxt.Write("[分割]");
+                        else
+                        {
+                            if (theInt32 > 0xff00) sctxt.WriteLine();
+                            sctxt.Write("[" + theInt32.ToString("X4") + "]");
+                        }
+                        break;
+
+
+                    default:
+                        if (flag) sctxt.Write(oriCodeTable.getCharacter(theInt32));
+                        else
+                        {
+                            if (theInt32 > 0xff00) sctxt.WriteLine();
+                            sctxt.Write("[" + theInt32.ToString("X4") + "]");
+                        }
+                        break;
+                }
+            }
             oriFileStream_scbin.Close();
+            sctxt.Close();
+        }
 
-            Toolkit.updateTheVerifyCode(outputFileStream_scbin);
-
-            outputFileStream_scbin.Close();
-
-            return true;
+        public static string ChsChangeToCht(string chsText)
+        {
+            return Microsoft.VisualBasic.Strings.StrConv(chsText, Microsoft.VisualBasic.VbStrConv.TraditionalChinese, 0);
         }
     }
 }

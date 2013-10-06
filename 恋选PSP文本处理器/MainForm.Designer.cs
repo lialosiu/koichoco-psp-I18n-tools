@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.导入文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,12 +42,14 @@
             this.全选ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.查找ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.选项ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.自动保存ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.状态着色ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.跳过已翻译文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.隐藏已翻译文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.字体ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.工具ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.生成Scbin与相应码表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.生成Scbin与相应码表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.导入PC版TXT文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.姓名处理ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.初始化文本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -72,6 +74,7 @@
             this.ChsSentences = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel_Waiting = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.panel_ForOri.SuspendLayout();
@@ -112,14 +115,14 @@
             // 导入文本ToolStripMenuItem
             // 
             this.导入文本ToolStripMenuItem.Name = "导入文本ToolStripMenuItem";
-            this.导入文本ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.导入文本ToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.导入文本ToolStripMenuItem.Text = "导入文本";
             this.导入文本ToolStripMenuItem.Click += new System.EventHandler(this.导入文本ToolStripMenuItem_Click);
             // 
             // 导出文本ToolStripMenuItem
             // 
             this.导出文本ToolStripMenuItem.Name = "导出文本ToolStripMenuItem";
-            this.导出文本ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.导出文本ToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.导出文本ToolStripMenuItem.Text = "导出文本";
             this.导出文本ToolStripMenuItem.Click += new System.EventHandler(this.导出文本ToolStripMenuItem_Click);
             // 
@@ -127,19 +130,19 @@
             // 
             this.保存ToolStripMenuItem.Name = "保存ToolStripMenuItem";
             this.保存ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.保存ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.保存ToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.保存ToolStripMenuItem.Text = "保存";
             this.保存ToolStripMenuItem.Click += new System.EventHandler(this.保存ToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(138, 6);
             // 
             // 退出ToolStripMenuItem
             // 
             this.退出ToolStripMenuItem.Name = "退出ToolStripMenuItem";
-            this.退出ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.退出ToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.退出ToolStripMenuItem.Text = "退出";
             this.退出ToolStripMenuItem.Click += new System.EventHandler(this.退出ToolStripMenuItem_Click);
             // 
@@ -158,21 +161,21 @@
             // 
             this.撤销ToolStripMenuItem.Enabled = false;
             this.撤销ToolStripMenuItem.Name = "撤销ToolStripMenuItem";
-            this.撤销ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.撤销ToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.撤销ToolStripMenuItem.Text = "撤销";
             // 
             // 重做ToolStripMenuItem
             // 
             this.重做ToolStripMenuItem.Enabled = false;
             this.重做ToolStripMenuItem.Name = "重做ToolStripMenuItem";
-            this.重做ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.重做ToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.重做ToolStripMenuItem.Text = "重做";
             // 
             // 全选ToolStripMenuItem
             // 
             this.全选ToolStripMenuItem.Name = "全选ToolStripMenuItem";
             this.全选ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.全选ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.全选ToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.全选ToolStripMenuItem.Text = "全选";
             this.全选ToolStripMenuItem.Click += new System.EventHandler(this.全选ToolStripMenuItem_Click);
             // 
@@ -180,19 +183,30 @@
             // 
             this.查找ToolStripMenuItem.Name = "查找ToolStripMenuItem";
             this.查找ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.查找ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.查找ToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.查找ToolStripMenuItem.Text = "查找";
             this.查找ToolStripMenuItem.Click += new System.EventHandler(this.查找ToolStripMenuItem_Click);
             // 
             // 选项ToolStripMenuItem
             // 
             this.选项ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.自动保存ToolStripMenuItem,
             this.状态着色ToolStripMenuItem,
             this.跳过已翻译文本ToolStripMenuItem,
-            this.隐藏已翻译文本ToolStripMenuItem});
+            this.隐藏已翻译文本ToolStripMenuItem,
+            this.字体ToolStripMenuItem});
             this.选项ToolStripMenuItem.Name = "选项ToolStripMenuItem";
             this.选项ToolStripMenuItem.Size = new System.Drawing.Size(43, 23);
             this.选项ToolStripMenuItem.Text = "选项";
+            // 
+            // 自动保存ToolStripMenuItem
+            // 
+            this.自动保存ToolStripMenuItem.Checked = true;
+            this.自动保存ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.自动保存ToolStripMenuItem.Name = "自动保存ToolStripMenuItem";
+            this.自动保存ToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
+            this.自动保存ToolStripMenuItem.Text = "自动保存";
+            this.自动保存ToolStripMenuItem.Click += new System.EventHandler(this.自动保存ToolStripMenuItem_Click);
             // 
             // 状态着色ToolStripMenuItem
             // 
@@ -220,50 +234,58 @@
             this.隐藏已翻译文本ToolStripMenuItem.Text = "隐藏已翻译文本";
             this.隐藏已翻译文本ToolStripMenuItem.Click += new System.EventHandler(this.隐藏已翻译文本ToolStripMenuItem_Click);
             // 
+            // 字体ToolStripMenuItem
+            // 
+            this.字体ToolStripMenuItem.Name = "字体ToolStripMenuItem";
+            this.字体ToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
+            this.字体ToolStripMenuItem.Text = "设置字体";
+            this.字体ToolStripMenuItem.Click += new System.EventHandler(this.字体ToolStripMenuItem_Click);
+            // 
             // 工具ToolStripMenuItem
             // 
             this.工具ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem1,
+            this.toolStripMenuItem2,
             this.生成Scbin与相应码表ToolStripMenuItem,
             this.导入PC版TXT文本ToolStripMenuItem,
             this.姓名处理ToolStripMenuItem,
-            this.初始化文本ToolStripMenuItem,
-            this.toolStripMenuItem2});
+            this.初始化文本ToolStripMenuItem});
             this.工具ToolStripMenuItem.Name = "工具ToolStripMenuItem";
             this.工具ToolStripMenuItem.Size = new System.Drawing.Size(43, 23);
             this.工具ToolStripMenuItem.Text = "工具";
             // 
-            // 生成Scbin与相应码表ToolStripMenuItem
-            // 
-            this.生成Scbin与相应码表ToolStripMenuItem.Name = "生成Scbin与相应码表ToolStripMenuItem";
-            this.生成Scbin与相应码表ToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
-            this.生成Scbin与相应码表ToolStripMenuItem.Text = "生成 sc.bin 和 lt.bin";
-            this.生成Scbin与相应码表ToolStripMenuItem.Click += new System.EventHandler(this.生成scbin和ltbinToolStripMenuItem_Click);
-            // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(177, 22);
-            this.toolStripMenuItem2.Text = "_(:3」∠)_";
-            this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(188, 22);
+            this.toolStripMenuItem2.Text = "生成bin文件（繁中）";
+            this.toolStripMenuItem2.Click += new System.EventHandler(this.buildBinFile_cht_ToolStripMenuItem_Click);
+            // 
+            // 生成Scbin与相应码表ToolStripMenuItem
+            // 
+            this.生成Scbin与相应码表ToolStripMenuItem.Name = "生成Scbin与相应码表ToolStripMenuItem";
+            this.生成Scbin与相应码表ToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.生成Scbin与相应码表ToolStripMenuItem.Text = "生成bin文件（等长）";
+            this.生成Scbin与相应码表ToolStripMenuItem.Click += new System.EventHandler(this.BuildBinFile_old_ToolStripMenuItem_Click);
             // 
             // 导入PC版TXT文本ToolStripMenuItem
             // 
             this.导入PC版TXT文本ToolStripMenuItem.Name = "导入PC版TXT文本ToolStripMenuItem";
-            this.导入PC版TXT文本ToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.导入PC版TXT文本ToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.导入PC版TXT文本ToolStripMenuItem.Text = "导入PC版TXT文本";
             this.导入PC版TXT文本ToolStripMenuItem.Click += new System.EventHandler(this.导入PC版TXT文本ToolStripMenuItem_Click);
             // 
             // 姓名处理ToolStripMenuItem
             // 
             this.姓名处理ToolStripMenuItem.Name = "姓名处理ToolStripMenuItem";
-            this.姓名处理ToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.姓名处理ToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.姓名处理ToolStripMenuItem.Text = "姓名处理";
             this.姓名处理ToolStripMenuItem.Click += new System.EventHandler(this.姓名处理ToolStripMenuItem_Click);
             // 
             // 初始化文本ToolStripMenuItem
             // 
             this.初始化文本ToolStripMenuItem.Name = "初始化文本ToolStripMenuItem";
-            this.初始化文本ToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.初始化文本ToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.初始化文本ToolStripMenuItem.Text = "初始化文本";
             this.初始化文本ToolStripMenuItem.Click += new System.EventHandler(this.初始化文本ToolStripMenuItem_Click);
             // 
@@ -280,19 +302,19 @@
             // 说明ToolStripMenuItem
             // 
             this.说明ToolStripMenuItem.Name = "说明ToolStripMenuItem";
-            this.说明ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.说明ToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.说明ToolStripMenuItem.Text = "说明";
             this.说明ToolStripMenuItem.Click += new System.EventHandler(this.说明ToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(135, 6);
             // 
             // lOSStudioToolStripMenuItem
             // 
             this.lOSStudioToolStripMenuItem.Name = "lOSStudioToolStripMenuItem";
-            this.lOSStudioToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.lOSStudioToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.lOSStudioToolStripMenuItem.Text = "LOS Studio";
             this.lOSStudioToolStripMenuItem.Click += new System.EventHandler(this.lOSStudioToolStripMenuItem_Click);
             // 
@@ -316,7 +338,7 @@
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(37, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(38, 17);
             this.toolStripStatusLabel1.Text = "状态1";
             // 
             // textBox_OriText
@@ -324,12 +346,12 @@
             this.textBox_OriText.BackColor = System.Drawing.Color.FloralWhite;
             this.textBox_OriText.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_OriText.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_OriText.Font = new System.Drawing.Font("极限新黑", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.textBox_OriText.Location = new System.Drawing.Point(0, 19);
+            this.textBox_OriText.Font = new System.Drawing.Font("MS Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.textBox_OriText.Location = new System.Drawing.Point(0, 16);
             this.textBox_OriText.Multiline = true;
             this.textBox_OriText.Name = "textBox_OriText";
             this.textBox_OriText.ReadOnly = true;
-            this.textBox_OriText.Size = new System.Drawing.Size(782, 59);
+            this.textBox_OriText.Size = new System.Drawing.Size(782, 62);
             this.textBox_OriText.TabIndex = 4;
             // 
             // panel_ForOri
@@ -349,11 +371,11 @@
             this.textBox_OriName.BackColor = System.Drawing.Color.FloralWhite;
             this.textBox_OriName.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_OriName.Dock = System.Windows.Forms.DockStyle.Top;
-            this.textBox_OriName.Font = new System.Drawing.Font("极限新黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBox_OriName.Font = new System.Drawing.Font("MS Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.textBox_OriName.Location = new System.Drawing.Point(0, 0);
             this.textBox_OriName.Name = "textBox_OriName";
             this.textBox_OriName.ReadOnly = true;
-            this.textBox_OriName.Size = new System.Drawing.Size(782, 19);
+            this.textBox_OriName.Size = new System.Drawing.Size(782, 16);
             this.textBox_OriName.TabIndex = 5;
             // 
             // textBox_ChsText
@@ -361,11 +383,11 @@
             this.textBox_ChsText.BackColor = System.Drawing.Color.LightYellow;
             this.textBox_ChsText.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_ChsText.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_ChsText.Font = new System.Drawing.Font("极限新黑", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.textBox_ChsText.Location = new System.Drawing.Point(0, 19);
+            this.textBox_ChsText.Font = new System.Drawing.Font("微软雅黑", 13F);
+            this.textBox_ChsText.Location = new System.Drawing.Point(0, 22);
             this.textBox_ChsText.Multiline = true;
             this.textBox_ChsText.Name = "textBox_ChsText";
-            this.textBox_ChsText.Size = new System.Drawing.Size(780, 57);
+            this.textBox_ChsText.Size = new System.Drawing.Size(780, 54);
             this.textBox_ChsText.TabIndex = 5;
             this.textBox_ChsText.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox_ChsText_KeyDown);
             this.textBox_ChsText.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_ChsText_KeyPress);
@@ -387,11 +409,11 @@
             this.textBox_ChsName.BackColor = System.Drawing.Color.LightYellow;
             this.textBox_ChsName.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_ChsName.Dock = System.Windows.Forms.DockStyle.Top;
-            this.textBox_ChsName.Font = new System.Drawing.Font("极限新黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBox_ChsName.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBox_ChsName.Location = new System.Drawing.Point(0, 0);
             this.textBox_ChsName.Name = "textBox_ChsName";
             this.textBox_ChsName.ReadOnly = true;
-            this.textBox_ChsName.Size = new System.Drawing.Size(780, 19);
+            this.textBox_ChsName.Size = new System.Drawing.Size(780, 22);
             this.textBox_ChsName.TabIndex = 6;
             // 
             // dataGridView
@@ -399,8 +421,8 @@
             this.dataGridView.AllowUserToAddRows = false;
             this.dataGridView.AllowUserToDeleteRows = false;
             this.dataGridView.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.dataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.dataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridView.BackgroundColor = System.Drawing.Color.White;
             this.dataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -492,6 +514,13 @@
             this.label1.Text = "处理中，请稍候 m(_ _)m";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(188, 22);
+            this.toolStripMenuItem1.Text = "生成bin文件";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.buildBinFile_ToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -507,7 +536,7 @@
             this.MinimumSize = new System.Drawing.Size(800, 500);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "恋选PSP文本处理器 Ver 0.61 Beta";
+            this.Text = "恋选PSP文本处理器 Ver 0.85 Beta";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.mainMenuStrip.ResumeLayout(false);
@@ -570,6 +599,9 @@
         private System.Windows.Forms.ToolStripTextBox QuickSearchTextBox;
         private System.Windows.Forms.ToolStripMenuItem 查找ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem 字体ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 自动保存ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
     }
 }
 

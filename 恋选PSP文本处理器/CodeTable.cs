@@ -11,22 +11,25 @@ namespace 恋选PSP文本处理器
 {
     public class CodeTable
     {
+        Int32 Count = 0;
         Dictionary<Int32, Char> code2character = new Dictionary<Int32, Char>();
         Dictionary<Char, Int32> character2code = new Dictionary<Char, Int32>();
 
         //设置某个Code的Character
         public void setCharacter(Int32 code, Char character)
         {
-            if (!code2character.ContainsKey(code))
+            if (!code2character.ContainsKey(code) && !character2code.ContainsKey(character))
+            {
                 code2character.Add(code, character);
-            if (!character2code.ContainsKey(character))
                 character2code.Add(character, code);
+                Count++;
+            }
         }
 
         //通过Code获取字符
         public Char getCharacter(Int32 code)
         {
-            Char thisCharacter = code2character[code];
+            Char thisCharacter = code2character.ContainsKey(code) ? code2character[code] : '\0';
             return thisCharacter;
         }
 
@@ -81,13 +84,18 @@ namespace 恋选PSP文本处理器
         /// <returns>码表</returns>
         public static CodeTable CodeTableFactory(List<Char> usedChsCharList)
         {
-            usedChsCharList.Insert(0, '　');
-            usedChsCharList.Insert(1, '■');
+            CodeTable oriCodeTable = CodeTable.OriCodeTableFactory();
             CodeTable theCodeTable = new CodeTable();
+            for (Int32 index = 0; index <= 489; index++)
+            {
+                theCodeTable.setCharacter(index, oriCodeTable.getCharacter(index));
+            }
+
             for (Int32 i = 0; i < usedChsCharList.Count; i++)
             {
                 Char thisChar = usedChsCharList[i];
-                theCodeTable.setCharacter(i, thisChar);
+                if (theCodeTable.getCode(thisChar) == null)
+                    theCodeTable.setCharacter(theCodeTable.Count, thisChar);
             }
             return theCodeTable;
         }
